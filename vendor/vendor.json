@@ -1,0 +1,13 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "lDSezwlOmPHHgHfoBjy0pb0PiWA=",
+			"path": "github.com/c2h5oh/datasize",
+			"revision": "4eba002a5eaea69cf8d235a388fc6b65ae68d2dd",
+			"revisionTime": "2017-12-27T19:17:56Z"
+		}
+	],
+	"rootPath": "SCIONLabSpeedCam"
+}
