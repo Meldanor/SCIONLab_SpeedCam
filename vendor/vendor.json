@@ -7,7 +7,13 @@
 			"path": "github.com/c2h5oh/datasize",
 			"revision": "4eba002a5eaea69cf8d235a388fc6b65ae68d2dd",
 			"revisionTime": "2017-12-27T19:17:56Z"
+		},
+		{
+			"checksumSHA1": "AnKBN2Q4AWaSNb0JyINBQbnpxGM=",
+			"path": "gopkg.in/yaml.v2",
+			"revision": "7f97868eec74b32b0982dd158a51a446d1da7eb5",
+			"revisionTime": "2018-02-23T19:12:37Z"
 		}
 	],
-	"rootPath": "SCIONLabSpeedCam"
+	"rootPath": "github.com/Meldanor/SCIONLab_SpeedCam"
 }

@@ -16,11 +16,11 @@
 package main
 
 import (
-	"SCIONLabSpeedCam/speed_cam"
 	"fmt"
 	"github.com/c2h5oh/datasize"
 	"github.com/scionproto/scion/go/lib/addr"
 	"time"
+	"github.com/Meldanor/SCIONLab_SpeedCam/speed_cam"
 )
 
 func main() {
