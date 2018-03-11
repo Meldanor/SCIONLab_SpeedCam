@@ -20,11 +20,15 @@ import (
 	"fmt"
 	"github.com/scionproto/scion/go/lib/addr"
 	"regexp"
+	"time"
 )
 
 type Inspector struct {
-	graph  *NetworkGraph
-	config *SpeedCamConfig
+	graph   *NetworkGraph
+	config  *SpeedCamConfig
+	fetcher PathRequestFetcher
+
+	active bool
 }
 
 // Creates an inspector with an empty to be explored network graph.
@@ -70,6 +74,43 @@ func (inspector *Inspector) HandlePathRequest(pathRequest string) error {
 	// Connect ASes pair wise
 	for i := 0; i < len(isdAses)-1; i++ {
 		inspector.graph.ConnectIsdAses(isdAses[i], isdAses[i+1])
+	}
+
+	return nil
+}
+
+func (inspector *Inspector) Start(fetcher PathRequestFetcher) error {
+
+	inspector.active = true
+	inspector.fetcher = fetcher
+
+	go inspector.fetchPathRequests()
+
+	for inspector.active {
+		time.Sleep(1 * time.Millisecond)
+	}
+
+	return nil
+}
+
+func (inspector *Inspector) Stop() {
+	inspector.active = false
+}
+
+func (inspector *Inspector) fetchPathRequests() error {
+
+	for inspector.active {
+
+		pathRequests, err := inspector.fetcher.FetchPathRequests()
+
+		for _, v := range pathRequests {
+			inspector.HandlePathRequest(v)
+		}
+		if err != nil {
+			return err
+		}
+		fmt.Printf("Handled %v requests\n", len(pathRequests))
+		time.Sleep(1 * time.Minute)
 	}
 
 	return nil

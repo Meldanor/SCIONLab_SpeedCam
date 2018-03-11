@@ -17,10 +17,10 @@ package main
 
 import (
 	"fmt"
+	"github.com/Meldanor/SCIONLab_SpeedCam/speed_cam"
 	"github.com/c2h5oh/datasize"
 	"github.com/scionproto/scion/go/lib/addr"
 	"time"
-	"github.com/Meldanor/SCIONLab_SpeedCam/speed_cam"
 )
 
 func main() {
@@ -35,6 +35,10 @@ func main() {
 	config.WeightActivity = 1.0
 	// Additional or fewer speedCams in  a selection
 	config.SpeedCamDiff = 0
+
+	inspector := speed_cam.CreateEmptyGraph(config)
+
+	inspector.Start(speed_cam.PathRequestRestFetcher{FetchUrl: "http://localhost:7536/pathServerRequests"})
 
 	graph := speed_cam.CreateEmpty(config)
 
