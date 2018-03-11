@@ -17,9 +17,19 @@ import "testing"
 
 func TestParse(t *testing.T) {
 
-	graph, err := CreateGraphFromTopology("test_resources/Tiny.topo", Default())
+	graph, err := CreateGraphFromTopology("../test_resources/Tiny.topo", Default())
 	if err != nil {
 		t.Errorf("error: %v\n", err)
 	}
-	t.Log(graph.size)
+	expected := uint32(3)
+	if graph.size != expected {
+		t.Errorf("Selected graph nodes should be %v, but it was %v", expected, graph.size)
+	}
+
+	graph, err = CreateGraphFromTopology("../test_resources/Default.topo", Default())
+
+	expected = uint32(16)
+	if graph.size != expected {
+		t.Errorf("Selected graph nodes should be %v, but it was %v", expected, graph.size)
+	}
 }
