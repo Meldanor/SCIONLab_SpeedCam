@@ -1,0 +1,368 @@
+# HELP border_base_labels Border base labels.
+# TYPE border_base_labels gauge
+border_base_labels{elem="br1-10-1"} 1
+# HELP border_input_bytes_total Total number of input bytes received.
+# TYPE border_input_bytes_total counter
+border_input_bytes_total{elem="br1-10-1",sock="intf:16"} 30367
+border_input_bytes_total{elem="br1-10-1",sock="loc:0"} 42108
+# HELP border_input_latency_seconds_total Total time packets wait in the kernel to be read, in seconds
+# TYPE border_input_latency_seconds_total counter
+border_input_latency_seconds_total{elem="br1-10-1",sock="intf:16"} 0.02369887
+border_input_latency_seconds_total{elem="br1-10-1",sock="loc:0"} 0.019420742000000005
+# HELP border_input_overflow_packets_total Total number of packets dropped by kernel due to receive buffer overflow.
+# TYPE border_input_overflow_packets_total gauge
+border_input_overflow_packets_total{elem="br1-10-1",sock="intf:16"} 0
+border_input_overflow_packets_total{elem="br1-10-1",sock="loc:0"} 0
+# HELP border_input_pkt_size_bytes Size of input packets in bytes
+# TYPE border_input_pkt_size_bytes histogram
+border_input_pkt_size_bytes_bucket{elem="br1-10-1",sock="intf:16",le="64"} 164
+border_input_pkt_size_bytes_bucket{elem="br1-10-1",sock="intf:16",le="256"} 164
+border_input_pkt_size_bytes_bucket{elem="br1-10-1",sock="intf:16",le="512"} 164
+border_input_pkt_size_bytes_bucket{elem="br1-10-1",sock="intf:16",le="1024"} 194
+border_input_pkt_size_bytes_bucket{elem="br1-10-1",sock="intf:16",le="1280"} 194
+border_input_pkt_size_bytes_bucket{elem="br1-10-1",sock="intf:16",le="1500"} 194
+border_input_pkt_size_bytes_bucket{elem="br1-10-1",sock="intf:16",le="3000"} 194
+border_input_pkt_size_bytes_bucket{elem="br1-10-1",sock="intf:16",le="6000"} 194
+border_input_pkt_size_bytes_bucket{elem="br1-10-1",sock="intf:16",le="9000"} 194
+border_input_pkt_size_bytes_bucket{elem="br1-10-1",sock="intf:16",le="+Inf"} 194
+border_input_pkt_size_bytes_sum{elem="br1-10-1",sock="intf:16"} 30367
+border_input_pkt_size_bytes_count{elem="br1-10-1",sock="intf:16"} 194
+border_input_pkt_size_bytes_bucket{elem="br1-10-1",sock="loc:0",le="64"} 0
+border_input_pkt_size_bytes_bucket{elem="br1-10-1",sock="loc:0",le="256"} 163
+border_input_pkt_size_bytes_bucket{elem="br1-10-1",sock="loc:0",le="512"} 163
+border_input_pkt_size_bytes_bucket{elem="br1-10-1",sock="loc:0",le="1024"} 193
+border_input_pkt_size_bytes_bucket{elem="br1-10-1",sock="loc:0",le="1280"} 193
+border_input_pkt_size_bytes_bucket{elem="br1-10-1",sock="loc:0",le="1500"} 193
+border_input_pkt_size_bytes_bucket{elem="br1-10-1",sock="loc:0",le="3000"} 193
+border_input_pkt_size_bytes_bucket{elem="br1-10-1",sock="loc:0",le="6000"} 193
+border_input_pkt_size_bytes_bucket{elem="br1-10-1",sock="loc:0",le="9000"} 193
+border_input_pkt_size_bytes_bucket{elem="br1-10-1",sock="loc:0",le="+Inf"} 193
+border_input_pkt_size_bytes_sum{elem="br1-10-1",sock="loc:0"} 42108
+border_input_pkt_size_bytes_count{elem="br1-10-1",sock="loc:0"} 193
+# HELP border_input_pkts_total Total number of input packets received.
+# TYPE border_input_pkts_total counter
+border_input_pkts_total{elem="br1-10-1",sock="intf:16"} 194
+border_input_pkts_total{elem="br1-10-1",sock="loc:0"} 193
+# HELP border_input_read_errors_total Total number of input socket read errors.
+# TYPE border_input_read_errors_total counter
+border_input_read_errors_total{elem="br1-10-1",sock="intf:16"} 0
+border_input_read_errors_total{elem="br1-10-1",sock="loc:0"} 0
+# HELP border_input_reads_total Total number of input socket reads.
+# TYPE border_input_reads_total counter
+border_input_reads_total{elem="br1-10-1",sock="intf:16"} 195
+border_input_reads_total{elem="br1-10-1",sock="loc:0"} 194
+# HELP border_interface_active Interface is active.
+# TYPE border_interface_active gauge
+border_interface_active{elem="br1-10-1",sock="intf:16"} 1
+# HELP border_output_bytes_total Total number of output bytes sent.
+# TYPE border_output_bytes_total counter
+border_output_bytes_total{elem="br1-10-1",sock="intf:16"} 36370
+border_output_bytes_total{elem="br1-10-1",sock="loc:0"} 30909
+# HELP border_output_pkt_size_bytes Size of output packets in bytes
+# TYPE border_output_pkt_size_bytes histogram
+border_output_pkt_size_bytes_bucket{elem="br1-10-1",sock="intf:16",le="64"} 165
+border_output_pkt_size_bytes_bucket{elem="br1-10-1",sock="intf:16",le="256"} 165
+border_output_pkt_size_bytes_bucket{elem="br1-10-1",sock="intf:16",le="512"} 165
+border_output_pkt_size_bytes_bucket{elem="br1-10-1",sock="intf:16",le="1024"} 195
+border_output_pkt_size_bytes_bucket{elem="br1-10-1",sock="intf:16",le="1280"} 195
+border_output_pkt_size_bytes_bucket{elem="br1-10-1",sock="intf:16",le="1500"} 195
+border_output_pkt_size_bytes_bucket{elem="br1-10-1",sock="intf:16",le="3000"} 195
+border_output_pkt_size_bytes_bucket{elem="br1-10-1",sock="intf:16",le="6000"} 195
+border_output_pkt_size_bytes_bucket{elem="br1-10-1",sock="intf:16",le="9000"} 195
+border_output_pkt_size_bytes_bucket{elem="br1-10-1",sock="intf:16",le="+Inf"} 195
+border_output_pkt_size_bytes_sum{elem="br1-10-1",sock="intf:16"} 36370
+border_output_pkt_size_bytes_count{elem="br1-10-1",sock="intf:16"} 195
+border_output_pkt_size_bytes_bucket{elem="br1-10-1",sock="loc:0",le="64"} 170
+border_output_pkt_size_bytes_bucket{elem="br1-10-1",sock="loc:0",le="256"} 170
+border_output_pkt_size_bytes_bucket{elem="br1-10-1",sock="loc:0",le="512"} 170
+border_output_pkt_size_bytes_bucket{elem="br1-10-1",sock="loc:0",le="1024"} 200
+border_output_pkt_size_bytes_bucket{elem="br1-10-1",sock="loc:0",le="1280"} 200
+border_output_pkt_size_bytes_bucket{elem="br1-10-1",sock="loc:0",le="1500"} 200
+border_output_pkt_size_bytes_bucket{elem="br1-10-1",sock="loc:0",le="3000"} 200
+border_output_pkt_size_bytes_bucket{elem="br1-10-1",sock="loc:0",le="6000"} 200
+border_output_pkt_size_bytes_bucket{elem="br1-10-1",sock="loc:0",le="9000"} 200
+border_output_pkt_size_bytes_bucket{elem="br1-10-1",sock="loc:0",le="+Inf"} 200
+border_output_pkt_size_bytes_sum{elem="br1-10-1",sock="loc:0"} 30909
+border_output_pkt_size_bytes_count{elem="br1-10-1",sock="loc:0"} 200
+# HELP border_output_pkts_total Total number of output packets sent.
+# TYPE border_output_pkts_total counter
+border_output_pkts_total{elem="br1-10-1",sock="intf:16"} 195
+border_output_pkts_total{elem="br1-10-1",sock="loc:0"} 200
+# HELP border_output_write_errors_total Number of output socket write errors.
+# TYPE border_output_write_errors_total counter
+border_output_write_errors_total{elem="br1-10-1",sock="intf:16"} 0
+border_output_write_errors_total{elem="br1-10-1",sock="loc:0"} 0
+# HELP border_output_write_seconds_total Total time spent writing output packets, in seconds.
+# TYPE border_output_write_seconds_total counter
+border_output_write_seconds_total{elem="br1-10-1",sock="intf:16"} 0.010841671999999997
+border_output_write_seconds_total{elem="br1-10-1",sock="loc:0"} 0.005270210000000003
+# HELP border_output_writes_total Number of output socket writes.
+# TYPE border_output_writes_total counter
+border_output_writes_total{elem="br1-10-1",sock="intf:16"} 195
+border_output_writes_total{elem="br1-10-1",sock="loc:0"} 200
+# HELP border_process_pkt_seconds_total Total processing time for input packets, in seconds.
+# TYPE border_process_pkt_seconds_total counter
+border_process_pkt_seconds_total{elem="br1-10-1",sock="intf:16"} 0.06335479400000002
+border_process_pkt_seconds_total{elem="br1-10-1",sock="loc:0"} 0.05391975299999999
+# HELP border_process_pkts_src_dst_total Total number of packets from one sock to another.
+# TYPE border_process_pkts_src_dst_total counter
+border_process_pkts_src_dst_total{elem="br1-10-1",inSock="intf:16",outSock="loc:0"} 30
+border_process_pkts_src_dst_total{elem="br1-10-1",inSock="loc:0",outSock="intf:16"} 30
+border_process_pkts_src_dst_total{elem="br1-10-1",inSock="self",outSock="intf:16"} 165
+border_process_pkts_src_dst_total{elem="br1-10-1",inSock="self",outSock="loc:0"} 170
+# HELP border_ringbuf_max_entries Maximum number of entries.
+# TYPE border_ringbuf_max_entries gauge
+border_ringbuf_max_entries{desc="extIn",elem="br1-10-1",ringId="intf:16"} 64
+border_ringbuf_max_entries{desc="extOut",elem="br1-10-1",ringId="intf:16"} 64
+border_ringbuf_max_entries{desc="free",elem="br1-10-1",ringId="freePkts"} 1024
+border_ringbuf_max_entries{desc="locIn",elem="br1-10-1",ringId="loc:0"} 64
+border_ringbuf_max_entries{desc="locOut",elem="br1-10-1",ringId="loc:0"} 64
+# HELP border_ringbuf_read_calls_total Number of calls to Read.
+# TYPE border_ringbuf_read_calls_total counter
+border_ringbuf_read_calls_total{desc="extIn",elem="br1-10-1",ringId="intf:16"} 195
+border_ringbuf_read_calls_total{desc="extOut",elem="br1-10-1",ringId="intf:16"} 196
+border_ringbuf_read_calls_total{desc="free",elem="br1-10-1",ringId="freePkts"} 14
+border_ringbuf_read_calls_total{desc="locIn",elem="br1-10-1",ringId="loc:0"} 194
+border_ringbuf_read_calls_total{desc="locOut",elem="br1-10-1",ringId="loc:0"} 201
+# HELP border_ringbuf_read_entries Number of read entries.
+# TYPE border_ringbuf_read_entries histogram
+border_ringbuf_read_entries_bucket{desc="extIn",elem="br1-10-1",ringId="intf:16",le="1"} 194
+border_ringbuf_read_entries_bucket{desc="extIn",elem="br1-10-1",ringId="intf:16",le="2"} 194
+border_ringbuf_read_entries_bucket{desc="extIn",elem="br1-10-1",ringId="intf:16",le="4"} 194
+border_ringbuf_read_entries_bucket{desc="extIn",elem="br1-10-1",ringId="intf:16",le="8"} 194
+border_ringbuf_read_entries_bucket{desc="extIn",elem="br1-10-1",ringId="intf:16",le="16"} 194
+border_ringbuf_read_entries_bucket{desc="extIn",elem="br1-10-1",ringId="intf:16",le="32"} 194
+border_ringbuf_read_entries_bucket{desc="extIn",elem="br1-10-1",ringId="intf:16",le="64"} 194
+border_ringbuf_read_entries_bucket{desc="extIn",elem="br1-10-1",ringId="intf:16",le="128"} 194
+border_ringbuf_read_entries_bucket{desc="extIn",elem="br1-10-1",ringId="intf:16",le="+Inf"} 194
+border_ringbuf_read_entries_sum{desc="extIn",elem="br1-10-1",ringId="intf:16"} 194
+border_ringbuf_read_entries_count{desc="extIn",elem="br1-10-1",ringId="intf:16"} 194
+border_ringbuf_read_entries_bucket{desc="extOut",elem="br1-10-1",ringId="intf:16",le="1"} 195
+border_ringbuf_read_entries_bucket{desc="extOut",elem="br1-10-1",ringId="intf:16",le="2"} 195
+border_ringbuf_read_entries_bucket{desc="extOut",elem="br1-10-1",ringId="intf:16",le="4"} 195
+border_ringbuf_read_entries_bucket{desc="extOut",elem="br1-10-1",ringId="intf:16",le="8"} 195
+border_ringbuf_read_entries_bucket{desc="extOut",elem="br1-10-1",ringId="intf:16",le="16"} 195
+border_ringbuf_read_entries_bucket{desc="extOut",elem="br1-10-1",ringId="intf:16",le="32"} 195
+border_ringbuf_read_entries_bucket{desc="extOut",elem="br1-10-1",ringId="intf:16",le="64"} 195
+border_ringbuf_read_entries_bucket{desc="extOut",elem="br1-10-1",ringId="intf:16",le="128"} 195
+border_ringbuf_read_entries_bucket{desc="extOut",elem="br1-10-1",ringId="intf:16",le="+Inf"} 195
+border_ringbuf_read_entries_sum{desc="extOut",elem="br1-10-1",ringId="intf:16"} 195
+border_ringbuf_read_entries_count{desc="extOut",elem="br1-10-1",ringId="intf:16"} 195
+border_ringbuf_read_entries_bucket{desc="free",elem="br1-10-1",ringId="freePkts",le="1"} 0
+border_ringbuf_read_entries_bucket{desc="free",elem="br1-10-1",ringId="freePkts",le="2"} 0
+border_ringbuf_read_entries_bucket{desc="free",elem="br1-10-1",ringId="freePkts",le="4"} 0
+border_ringbuf_read_entries_bucket{desc="free",elem="br1-10-1",ringId="freePkts",le="8"} 0
+border_ringbuf_read_entries_bucket{desc="free",elem="br1-10-1",ringId="freePkts",le="16"} 0
+border_ringbuf_read_entries_bucket{desc="free",elem="br1-10-1",ringId="freePkts",le="32"} 14
+border_ringbuf_read_entries_bucket{desc="free",elem="br1-10-1",ringId="freePkts",le="64"} 14
+border_ringbuf_read_entries_bucket{desc="free",elem="br1-10-1",ringId="freePkts",le="128"} 14
+border_ringbuf_read_entries_bucket{desc="free",elem="br1-10-1",ringId="freePkts",le="+Inf"} 14
+border_ringbuf_read_entries_sum{desc="free",elem="br1-10-1",ringId="freePkts"} 412
+border_ringbuf_read_entries_count{desc="free",elem="br1-10-1",ringId="freePkts"} 14
+border_ringbuf_read_entries_bucket{desc="locIn",elem="br1-10-1",ringId="loc:0",le="1"} 193
+border_ringbuf_read_entries_bucket{desc="locIn",elem="br1-10-1",ringId="loc:0",le="2"} 193
+border_ringbuf_read_entries_bucket{desc="locIn",elem="br1-10-1",ringId="loc:0",le="4"} 193
+border_ringbuf_read_entries_bucket{desc="locIn",elem="br1-10-1",ringId="loc:0",le="8"} 193
+border_ringbuf_read_entries_bucket{desc="locIn",elem="br1-10-1",ringId="loc:0",le="16"} 193
+border_ringbuf_read_entries_bucket{desc="locIn",elem="br1-10-1",ringId="loc:0",le="32"} 193
+border_ringbuf_read_entries_bucket{desc="locIn",elem="br1-10-1",ringId="loc:0",le="64"} 193
+border_ringbuf_read_entries_bucket{desc="locIn",elem="br1-10-1",ringId="loc:0",le="128"} 193
+border_ringbuf_read_entries_bucket{desc="locIn",elem="br1-10-1",ringId="loc:0",le="+Inf"} 193
+border_ringbuf_read_entries_sum{desc="locIn",elem="br1-10-1",ringId="loc:0"} 193
+border_ringbuf_read_entries_count{desc="locIn",elem="br1-10-1",ringId="loc:0"} 193
+border_ringbuf_read_entries_bucket{desc="locOut",elem="br1-10-1",ringId="loc:0",le="1"} 200
+border_ringbuf_read_entries_bucket{desc="locOut",elem="br1-10-1",ringId="loc:0",le="2"} 200
+border_ringbuf_read_entries_bucket{desc="locOut",elem="br1-10-1",ringId="loc:0",le="4"} 200
+border_ringbuf_read_entries_bucket{desc="locOut",elem="br1-10-1",ringId="loc:0",le="8"} 200
+border_ringbuf_read_entries_bucket{desc="locOut",elem="br1-10-1",ringId="loc:0",le="16"} 200
+border_ringbuf_read_entries_bucket{desc="locOut",elem="br1-10-1",ringId="loc:0",le="32"} 200
+border_ringbuf_read_entries_bucket{desc="locOut",elem="br1-10-1",ringId="loc:0",le="64"} 200
+border_ringbuf_read_entries_bucket{desc="locOut",elem="br1-10-1",ringId="loc:0",le="128"} 200
+border_ringbuf_read_entries_bucket{desc="locOut",elem="br1-10-1",ringId="loc:0",le="+Inf"} 200
+border_ringbuf_read_entries_sum{desc="locOut",elem="br1-10-1",ringId="loc:0"} 200
+border_ringbuf_read_entries_count{desc="locOut",elem="br1-10-1",ringId="loc:0"} 200
+# HELP border_ringbuf_reads_blocked_total Number of blocked Reads.
+# TYPE border_ringbuf_reads_blocked_total counter
+border_ringbuf_reads_blocked_total{desc="extIn",elem="br1-10-1",ringId="intf:16"} 195
+border_ringbuf_reads_blocked_total{desc="extOut",elem="br1-10-1",ringId="intf:16"} 196
+border_ringbuf_reads_blocked_total{desc="free",elem="br1-10-1",ringId="freePkts"} 0
+border_ringbuf_reads_blocked_total{desc="locIn",elem="br1-10-1",ringId="loc:0"} 194
+border_ringbuf_reads_blocked_total{desc="locOut",elem="br1-10-1",ringId="loc:0"} 201
+# HELP border_ringbuf_used_entries Number of used entries.
+# TYPE border_ringbuf_used_entries gauge
+border_ringbuf_used_entries{desc="extIn",elem="br1-10-1",ringId="intf:16"} 0
+border_ringbuf_used_entries{desc="extOut",elem="br1-10-1",ringId="intf:16"} 0
+border_ringbuf_used_entries{desc="free",elem="br1-10-1",ringId="freePkts"} 999
+border_ringbuf_used_entries{desc="locIn",elem="br1-10-1",ringId="loc:0"} 0
+border_ringbuf_used_entries{desc="locOut",elem="br1-10-1",ringId="loc:0"} 0
+# HELP border_ringbuf_write_calls_total Number of calls to Write.
+# TYPE border_ringbuf_write_calls_total counter
+border_ringbuf_write_calls_total{desc="extIn",elem="br1-10-1",ringId="intf:16"} 194
+border_ringbuf_write_calls_total{desc="extOut",elem="br1-10-1",ringId="intf:16"} 195
+border_ringbuf_write_calls_total{desc="free",elem="br1-10-1",ringId="freePkts"} 387
+border_ringbuf_write_calls_total{desc="locIn",elem="br1-10-1",ringId="loc:0"} 193
+border_ringbuf_write_calls_total{desc="locOut",elem="br1-10-1",ringId="loc:0"} 200
+# HELP border_ringbuf_write_entries Number of written entries.
+# TYPE border_ringbuf_write_entries histogram
+border_ringbuf_write_entries_bucket{desc="extIn",elem="br1-10-1",ringId="intf:16",le="1"} 194
+border_ringbuf_write_entries_bucket{desc="extIn",elem="br1-10-1",ringId="intf:16",le="2"} 194
+border_ringbuf_write_entries_bucket{desc="extIn",elem="br1-10-1",ringId="intf:16",le="4"} 194
+border_ringbuf_write_entries_bucket{desc="extIn",elem="br1-10-1",ringId="intf:16",le="8"} 194
+border_ringbuf_write_entries_bucket{desc="extIn",elem="br1-10-1",ringId="intf:16",le="16"} 194
+border_ringbuf_write_entries_bucket{desc="extIn",elem="br1-10-1",ringId="intf:16",le="32"} 194
+border_ringbuf_write_entries_bucket{desc="extIn",elem="br1-10-1",ringId="intf:16",le="64"} 194
+border_ringbuf_write_entries_bucket{desc="extIn",elem="br1-10-1",ringId="intf:16",le="128"} 194
+border_ringbuf_write_entries_bucket{desc="extIn",elem="br1-10-1",ringId="intf:16",le="+Inf"} 194
+border_ringbuf_write_entries_sum{desc="extIn",elem="br1-10-1",ringId="intf:16"} 194
+border_ringbuf_write_entries_count{desc="extIn",elem="br1-10-1",ringId="intf:16"} 194
+border_ringbuf_write_entries_bucket{desc="extOut",elem="br1-10-1",ringId="intf:16",le="1"} 195
+border_ringbuf_write_entries_bucket{desc="extOut",elem="br1-10-1",ringId="intf:16",le="2"} 195
+border_ringbuf_write_entries_bucket{desc="extOut",elem="br1-10-1",ringId="intf:16",le="4"} 195
+border_ringbuf_write_entries_bucket{desc="extOut",elem="br1-10-1",ringId="intf:16",le="8"} 195
+border_ringbuf_write_entries_bucket{desc="extOut",elem="br1-10-1",ringId="intf:16",le="16"} 195
+border_ringbuf_write_entries_bucket{desc="extOut",elem="br1-10-1",ringId="intf:16",le="32"} 195
+border_ringbuf_write_entries_bucket{desc="extOut",elem="br1-10-1",ringId="intf:16",le="64"} 195
+border_ringbuf_write_entries_bucket{desc="extOut",elem="br1-10-1",ringId="intf:16",le="128"} 195
+border_ringbuf_write_entries_bucket{desc="extOut",elem="br1-10-1",ringId="intf:16",le="+Inf"} 195
+border_ringbuf_write_entries_sum{desc="extOut",elem="br1-10-1",ringId="intf:16"} 195
+border_ringbuf_write_entries_count{desc="extOut",elem="br1-10-1",ringId="intf:16"} 195
+border_ringbuf_write_entries_bucket{desc="free",elem="br1-10-1",ringId="freePkts",le="1"} 387
+border_ringbuf_write_entries_bucket{desc="free",elem="br1-10-1",ringId="freePkts",le="2"} 387
+border_ringbuf_write_entries_bucket{desc="free",elem="br1-10-1",ringId="freePkts",le="4"} 387
+border_ringbuf_write_entries_bucket{desc="free",elem="br1-10-1",ringId="freePkts",le="8"} 387
+border_ringbuf_write_entries_bucket{desc="free",elem="br1-10-1",ringId="freePkts",le="16"} 387
+border_ringbuf_write_entries_bucket{desc="free",elem="br1-10-1",ringId="freePkts",le="32"} 387
+border_ringbuf_write_entries_bucket{desc="free",elem="br1-10-1",ringId="freePkts",le="64"} 387
+border_ringbuf_write_entries_bucket{desc="free",elem="br1-10-1",ringId="freePkts",le="128"} 387
+border_ringbuf_write_entries_bucket{desc="free",elem="br1-10-1",ringId="freePkts",le="+Inf"} 387
+border_ringbuf_write_entries_sum{desc="free",elem="br1-10-1",ringId="freePkts"} 387
+border_ringbuf_write_entries_count{desc="free",elem="br1-10-1",ringId="freePkts"} 387
+border_ringbuf_write_entries_bucket{desc="locIn",elem="br1-10-1",ringId="loc:0",le="1"} 193
+border_ringbuf_write_entries_bucket{desc="locIn",elem="br1-10-1",ringId="loc:0",le="2"} 193
+border_ringbuf_write_entries_bucket{desc="locIn",elem="br1-10-1",ringId="loc:0",le="4"} 193
+border_ringbuf_write_entries_bucket{desc="locIn",elem="br1-10-1",ringId="loc:0",le="8"} 193
+border_ringbuf_write_entries_bucket{desc="locIn",elem="br1-10-1",ringId="loc:0",le="16"} 193
+border_ringbuf_write_entries_bucket{desc="locIn",elem="br1-10-1",ringId="loc:0",le="32"} 193
+border_ringbuf_write_entries_bucket{desc="locIn",elem="br1-10-1",ringId="loc:0",le="64"} 193
+border_ringbuf_write_entries_bucket{desc="locIn",elem="br1-10-1",ringId="loc:0",le="128"} 193
+border_ringbuf_write_entries_bucket{desc="locIn",elem="br1-10-1",ringId="loc:0",le="+Inf"} 193
+border_ringbuf_write_entries_sum{desc="locIn",elem="br1-10-1",ringId="loc:0"} 193
+border_ringbuf_write_entries_count{desc="locIn",elem="br1-10-1",ringId="loc:0"} 193
+border_ringbuf_write_entries_bucket{desc="locOut",elem="br1-10-1",ringId="loc:0",le="1"} 200
+border_ringbuf_write_entries_bucket{desc="locOut",elem="br1-10-1",ringId="loc:0",le="2"} 200
+border_ringbuf_write_entries_bucket{desc="locOut",elem="br1-10-1",ringId="loc:0",le="4"} 200
+border_ringbuf_write_entries_bucket{desc="locOut",elem="br1-10-1",ringId="loc:0",le="8"} 200
+border_ringbuf_write_entries_bucket{desc="locOut",elem="br1-10-1",ringId="loc:0",le="16"} 200
+border_ringbuf_write_entries_bucket{desc="locOut",elem="br1-10-1",ringId="loc:0",le="32"} 200
+border_ringbuf_write_entries_bucket{desc="locOut",elem="br1-10-1",ringId="loc:0",le="64"} 200
+border_ringbuf_write_entries_bucket{desc="locOut",elem="br1-10-1",ringId="loc:0",le="128"} 200
+border_ringbuf_write_entries_bucket{desc="locOut",elem="br1-10-1",ringId="loc:0",le="+Inf"} 200
+border_ringbuf_write_entries_sum{desc="locOut",elem="br1-10-1",ringId="loc:0"} 200
+border_ringbuf_write_entries_count{desc="locOut",elem="br1-10-1",ringId="loc:0"} 200
+# HELP border_ringbuf_writes_blocked_total Number of blocked Writes.
+# TYPE border_ringbuf_writes_blocked_total counter
+border_ringbuf_writes_blocked_total{desc="extIn",elem="br1-10-1",ringId="intf:16"} 0
+border_ringbuf_writes_blocked_total{desc="extOut",elem="br1-10-1",ringId="intf:16"} 0
+border_ringbuf_writes_blocked_total{desc="free",elem="br1-10-1",ringId="freePkts"} 0
+border_ringbuf_writes_blocked_total{desc="locIn",elem="br1-10-1",ringId="loc:0"} 0
+border_ringbuf_writes_blocked_total{desc="locOut",elem="br1-10-1",ringId="loc:0"} 0
+# HELP go_gc_duration_seconds A summary of the GC invocation durations.
+# TYPE go_gc_duration_seconds summary
+go_gc_duration_seconds{quantile="0"} 9.2413e-05
+go_gc_duration_seconds{quantile="0.25"} 9.298e-05
+go_gc_duration_seconds{quantile="0.5"} 0.010827956
+go_gc_duration_seconds{quantile="0.75"} 0.020352448
+go_gc_duration_seconds{quantile="1"} 0.020352448
+go_gc_duration_seconds_sum 0.031365797
+go_gc_duration_seconds_count 4
+# HELP go_goroutines Number of goroutines that currently exist.
+# TYPE go_goroutines gauge
+go_goroutines 46
+# HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
+# TYPE go_memstats_alloc_bytes gauge
+go_memstats_alloc_bytes 1.8935992e+07
+# HELP go_memstats_alloc_bytes_total Total number of bytes allocated, even if freed.
+# TYPE go_memstats_alloc_bytes_total counter
+go_memstats_alloc_bytes_total 2.9127064e+07
+# HELP go_memstats_buck_hash_sys_bytes Number of bytes used by the profiling bucket hash table.
+# TYPE go_memstats_buck_hash_sys_bytes gauge
+go_memstats_buck_hash_sys_bytes 1.447877e+06
+# HELP go_memstats_frees_total Total number of frees.
+# TYPE go_memstats_frees_total counter
+go_memstats_frees_total 78982
+# HELP go_memstats_gc_sys_bytes Number of bytes used for garbage collection system metadata.
+# TYPE go_memstats_gc_sys_bytes gauge
+go_memstats_gc_sys_bytes 978944
+# HELP go_memstats_heap_alloc_bytes Number of heap bytes allocated and still in use.
+# TYPE go_memstats_heap_alloc_bytes gauge
+go_memstats_heap_alloc_bytes 1.8935992e+07
+# HELP go_memstats_heap_idle_bytes Number of heap bytes waiting to be used.
+# TYPE go_memstats_heap_idle_bytes gauge
+go_memstats_heap_idle_bytes 3.186688e+06
+# HELP go_memstats_heap_inuse_bytes Number of heap bytes that are in use.
+# TYPE go_memstats_heap_inuse_bytes gauge
+go_memstats_heap_inuse_bytes 2.0144128e+07
+# HELP go_memstats_heap_objects Number of allocated objects.
+# TYPE go_memstats_heap_objects gauge
+go_memstats_heap_objects 52644
+# HELP go_memstats_heap_released_bytes_total Total number of heap bytes released to OS.
+# TYPE go_memstats_heap_released_bytes_total counter
+go_memstats_heap_released_bytes_total 0
+# HELP go_memstats_heap_sys_bytes Number of heap bytes obtained from system.
+# TYPE go_memstats_heap_sys_bytes gauge
+go_memstats_heap_sys_bytes 2.3330816e+07
+# HELP go_memstats_last_gc_time_seconds Number of seconds since 1970 of last garbage collection.
+# TYPE go_memstats_last_gc_time_seconds gauge
+go_memstats_last_gc_time_seconds 1.5208592453447235e+09
+# HELP go_memstats_lookups_total Total number of pointer lookups.
+# TYPE go_memstats_lookups_total counter
+go_memstats_lookups_total 46
+# HELP go_memstats_mallocs_total Total number of mallocs.
+# TYPE go_memstats_mallocs_total counter
+go_memstats_mallocs_total 131626
+# HELP go_memstats_mcache_inuse_bytes Number of bytes in use by mcache structures.
+# TYPE go_memstats_mcache_inuse_bytes gauge
+go_memstats_mcache_inuse_bytes 6944
+# HELP go_memstats_mcache_sys_bytes Number of bytes used for mcache structures obtained from system.
+# TYPE go_memstats_mcache_sys_bytes gauge
+go_memstats_mcache_sys_bytes 16384
+# HELP go_memstats_mspan_inuse_bytes Number of bytes in use by mspan structures.
+# TYPE go_memstats_mspan_inuse_bytes gauge
+go_memstats_mspan_inuse_bytes 174192
+# HELP go_memstats_mspan_sys_bytes Number of bytes used for mspan structures obtained from system.
+# TYPE go_memstats_mspan_sys_bytes gauge
+go_memstats_mspan_sys_bytes 196608
+# HELP go_memstats_next_gc_bytes Number of heap bytes when next garbage collection will take place.
+# TYPE go_memstats_next_gc_bytes gauge
+go_memstats_next_gc_bytes 2.4747248e+07
+# HELP go_memstats_other_sys_bytes Number of bytes used for other system allocations.
+# TYPE go_memstats_other_sys_bytes gauge
+go_memstats_other_sys_bytes 1.151283e+06
+# HELP go_memstats_stack_inuse_bytes Number of bytes in use by the stack allocator.
+# TYPE go_memstats_stack_inuse_bytes gauge
+go_memstats_stack_inuse_bytes 786432
+# HELP go_memstats_stack_sys_bytes Number of bytes obtained from system for stack allocator.
+# TYPE go_memstats_stack_sys_bytes gauge
+go_memstats_stack_sys_bytes 786432
+# HELP go_memstats_sys_bytes Number of bytes obtained by system. Sum of all system allocations.
+# TYPE go_memstats_sys_bytes gauge
+go_memstats_sys_bytes 2.7908344e+07
+# HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.
+# TYPE process_cpu_seconds_total counter
+process_cpu_seconds_total 0.19
+# HELP process_max_fds Maximum number of open file descriptors.
+# TYPE process_max_fds gauge
+process_max_fds 1024
+# HELP process_open_fds Number of open file descriptors.
+# TYPE process_open_fds gauge
+process_open_fds 10
+# HELP process_resident_memory_bytes Resident memory size in bytes.
+# TYPE process_resident_memory_bytes gauge
+process_resident_memory_bytes 2.6722304e+07
+# HELP process_start_time_seconds Start time of the process since unix epoch in seconds.
+# TYPE process_start_time_seconds gauge
+process_start_time_seconds 1.52085915379e+09
+# HELP process_virtual_memory_bytes Virtual memory size in bytes.
+# TYPE process_virtual_memory_bytes gauge
+process_virtual_memory_bytes 3.9247872e+08
+
