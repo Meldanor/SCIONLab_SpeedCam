@@ -36,10 +36,6 @@ func main() {
 	// Additional or fewer speedCams in  a selection
 	config.SpeedCamDiff = 0
 
-	inspector := speed_cam.CreateEmptyGraph(config)
-
-	inspector.Start(speed_cam.PathRequestRestFetcher{FetchUrl: "http://localhost:7536/pathServerRequests"})
-
 	graph := speed_cam.CreateEmpty(config)
 
 	// Create ASes and add them to the graph

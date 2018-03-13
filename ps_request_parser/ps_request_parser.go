@@ -30,17 +30,22 @@ func main() {
 		return
 	}
 
-	_, err := os.Stat(*logDirPtr)
+	StartParseLogs(*logDirPtr, *sendPathRequestsResource)
+}
+
+func StartParseLogs(logDir string, sendPathRequestResource string) {
+
+	_, err := os.Stat(logDir)
 
 	if os.IsNotExist(err) {
-		fmt.Printf("log dir '%v' does not exist\n", *logDirPtr)
+		fmt.Printf("log dir '%v' does not exist\n", logDir)
 		return
 	}
 
-	fmt.Printf("Log directory: %v", *logDirPtr)
+	fmt.Printf("Log directory: %v", logDir)
 
 	fmt.Println("Search for log files...")
-	pathServerLogFiles, err := searchPathServerLogs(*logDirPtr)
+	pathServerLogFiles, err := searchPathServerLogs(logDir)
 
 	if err != nil {
 		fmt.Printf("search path server logs. error: %v", err)
@@ -49,7 +54,7 @@ func main() {
 
 	fmt.Println("Parsing log files: ", pathServerLogFiles)
 	for _, logFile := range pathServerLogFiles {
-		parseLogFile(logFile, *sendPathRequestsResource)
+		parseLogFile(logFile, sendPathRequestResource)
 	}
 }
 
