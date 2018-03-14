@@ -27,7 +27,7 @@ type PrometheusClientFetcher struct {
 
 func (fetcher *PrometheusClientFetcher) PollData() error {
 
-	err := FetchJsonData(fetcher.FetcherResource, fetcher.Info)
+	err := FetchJsonData(fetcher.FetcherResource, &fetcher.Info)
 	return err
 }
 
@@ -35,6 +35,7 @@ type PrometheusClientInfo struct {
 	Ip          string
 	Port        int
 	BrId        string
+	SourceIsdAs addr.ISD_AS
 	TargetIsdAs addr.ISD_AS
 }
 

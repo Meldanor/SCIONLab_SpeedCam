@@ -102,7 +102,50 @@ func (inspector *Inspector) Stop() {
 
 func (inspector *Inspector) StartInspection() {
 
-	// TODO: Implement inspection
+	fmt.Printf("Start inspection!\n")
+	selector := Create(inspector.config)
+	selectSpeedCams := selector.SelectSpeedCams(inspector.graph)
+	clientInfos := inspector.brInfoFetcher.Info
+	clientInfoGrouped := groupBySource(clientInfos)
+
+	size := len(selectSpeedCams)
+	resultChannel := make(chan map[addr.ISD_AS][]SpeedCamResult, size)
+	defer close(resultChannel)
+
+	for _, selectedSpeedCam := range selectSpeedCams {
+		fmt.Printf("Initiate speed cam on '%v'\n", selectedSpeedCam.IsdAs)
+		info := clientInfoGrouped[selectedSpeedCam.IsdAs]
+		speedCam := CreateSpeedCam(selectedSpeedCam.IsdAs, 30*time.Second)
+		fmt.Printf("Start speed cam on '%v' for 30 seconds\n", selectedSpeedCam.IsdAs)
+		go func(cam *SpeedCam, c chan map[addr.ISD_AS][]SpeedCamResult) {
+
+			c <- cam.Measure(info, 5*time.Second)
+		}(speedCam, resultChannel)
+	}
+
+	for i := 0; i < size; i++ {
+		measureResults := <-resultChannel
+		fmt.Printf("Results of %v: \n", i+1)
+		for k, v := range measureResults {
+			fmt.Printf("\tResults for %v:\n", k)
+			for _, result := range v {
+				fmt.Printf("\t\tLink: %v<->%v Timestamp: %v, In: %v/s, Out: %v/s\n",
+					result.Source, result.Neighbor, result.Timestamp, result.BandwidthIn.HR(), result.BandwidthOut.HR())
+			}
+		}
+	}
+	fmt.Printf("Inspection finished!\n")
+}
+
+func groupBySource(clientInfos []PrometheusClientInfo) map[addr.ISD_AS][]PrometheusClientInfo {
+	result := make(map[addr.ISD_AS][]PrometheusClientInfo)
+
+	for _, clientInfo := range clientInfos {
+		k := clientInfo.SourceIsdAs
+		result[k] = append(result[k], clientInfo)
+	}
+
+	return result
 }
 
 func (inspector *Inspector) fetchPathRequests() error {
@@ -119,7 +162,7 @@ func (inspector *Inspector) fetchPathRequests() error {
 			return err
 		}
 		fmt.Printf("Handled %v path requests\n", len(pathRequests))
-		time.Sleep(1 * time.Minute)
+		time.Sleep(5 * time.Minute)
 	}
 
 	return nil
@@ -136,7 +179,7 @@ func (inspector *Inspector) fetchBrInfo() error {
 			return err
 		}
 		fmt.Printf("Polled %v border router information\n", len(inspector.brInfoFetcher.Info))
-		time.Sleep(30 * time.Second)
+		time.Sleep(5 * time.Minute)
 	}
 	return nil
 }

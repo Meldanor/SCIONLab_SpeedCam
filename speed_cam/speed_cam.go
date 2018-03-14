@@ -27,12 +27,12 @@ import (
 )
 
 type SpeedCam struct {
-	isdAs    *addr.ISD_AS
+	isdAs    addr.ISD_AS
 	duration time.Duration
 	start    time.Time
 }
 
-func CreateSpeedCam(isdAs *addr.ISD_AS, duration time.Duration) *SpeedCam {
+func CreateSpeedCam(isdAs addr.ISD_AS, duration time.Duration) *SpeedCam {
 	return &SpeedCam{isdAs: isdAs, duration: duration}
 }
 
@@ -51,7 +51,7 @@ func (cam *SpeedCam) Measure(measurementPoints []PrometheusClientInfo, pollInter
 	resultMap := make(map[addr.ISD_AS][]SpeedCamResult)
 	for i := 0; i < len(measurementPoints); i++ {
 		resultsPerBr := <-resultChannel
-		brId := resultsPerBr[0].Source
+		brId := resultsPerBr[0].Neighbor
 		resultMap[brId] = resultsPerBr
 	}
 	return resultMap
@@ -120,11 +120,11 @@ func collectData(cam *SpeedCam, measurementPoint PrometheusClientInfo, pollInter
 	for {
 		url := measurementPoint.URL()
 
-		result := SpeedCamResult{Timestamp: time.Now(), BandwidthIn: 0, BandwidthOut: 0, Source: *cam.isdAs, Neighbor: measurementPoint.TargetIsdAs}
+		result := SpeedCamResult{Timestamp: time.Now(), BandwidthIn: 0, BandwidthOut: 0, Source: cam.isdAs, Neighbor: measurementPoint.TargetIsdAs}
 		err := cam.pollData(url, &result)
 
 		if err != nil {
-			fmt.Printf("error polling data. speedcam: %v, url: %v", cam.isdAs, url)
+			fmt.Printf("error polling data. speedcam: %v, url: %v\n", cam.isdAs, url)
 			continue
 		}
 
@@ -141,7 +141,7 @@ func collectData(cam *SpeedCam, measurementPoint PrometheusClientInfo, pollInter
 
 func (cam *SpeedCam) pollData(prometheusUrl string, result *SpeedCamResult) error {
 
-	readBytes, err := FetchData(prometheusUrl)
+	readBytes, err := FetchData(prometheusUrl + "/metrics")
 	if err != nil {
 		fmt.Printf("error polling data, err: %v\n", err)
 		return err

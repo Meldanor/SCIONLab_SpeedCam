@@ -128,18 +128,22 @@ func main() {
 		}
 	}()
 
-	fmt.Println("Wait 5 seconds to populate the data")
-	time.Sleep(5 * time.Second)
+	fmt.Println("Wait 2 seconds to populate the data")
+	time.Sleep(2 * time.Second)
 	// Initiate the speed cam algorithm
 	inspector := speed_cam.CreateEmptyGraph(speed_cam.Default())
 	requestRestFetcher := speed_cam.PathRequestRestFetcher{FetchUrl: ts.URL + "/pathServerRequests"}
 	borderRouterInfoFetcher := speed_cam.PrometheusClientFetcher{FetcherResource: ts.URL + "/prometheusClient"}
 
 	//Start speed cam algorithm
-	inspector.Start(requestRestFetcher, borderRouterInfoFetcher)
+	go inspector.Start(requestRestFetcher, borderRouterInfoFetcher)
+
+	fmt.Println("Wait 2 seconds before starting the inspection")
+	time.Sleep(2 * time.Second)
 
 	fmt.Println("Starting loop...")
 	for {
+		inspector.StartInspection()
 		time.Sleep(10 * time.Second)
 	}
 	fmt.Println("Finished loop!")
@@ -227,7 +231,7 @@ func parseBrConfigFile(brConfigFilePath string, info *speed_cam.PrometheusClient
 
 			info.BrId = brId
 			split := strings.Split(ipPort, ":")
-			info.Ip = split[0]
+			info.Ip = "http://" + split[0]
 			info.Port, err = strconv.Atoi(split[1])
 			if err != nil {
 				fmt.Printf("error parsing port in string '%v' ; err: %v", ipPort, err)
@@ -273,6 +277,8 @@ func parseBrTopologyFile(topologyFile string, info *speed_cam.PrometheusClientIn
 		fmt.Printf("error reading topology file '%v', err: %v\n", topologyFile, err)
 		return
 	}
+	sourceIsdAs, _ := addr.IAFromString(root["ISD_AS"].(string))
+	info.SourceIsdAs = *sourceIsdAs
 	// Go down the hierarchy
 	borderRouters := root["BorderRouters"].(map[string]interface{})
 	borderRouterInfoObject := borderRouters[info.BrId].(map[string]interface{})
