@@ -24,9 +24,10 @@ import (
 )
 
 type Inspector struct {
-	graph   *NetworkGraph
-	config  *SpeedCamConfig
-	fetcher PathRequestFetcher
+	graph         *NetworkGraph
+	config        *SpeedCamConfig
+	fetcher       PathRequestFetcher
+	brInfoFetcher PrometheusClientFetcher
 
 	active bool
 }
@@ -79,12 +80,14 @@ func (inspector *Inspector) HandlePathRequest(pathRequest string) error {
 	return nil
 }
 
-func (inspector *Inspector) Start(fetcher PathRequestFetcher) error {
+func (inspector *Inspector) Start(fetcher PathRequestFetcher, clientFetcher PrometheusClientFetcher) error {
 
 	inspector.active = true
 	inspector.fetcher = fetcher
+	inspector.brInfoFetcher = clientFetcher
 
 	go inspector.fetchPathRequests()
+	go inspector.fetchBrInfo()
 
 	for inspector.active {
 		time.Sleep(1 * time.Millisecond)
@@ -97,6 +100,11 @@ func (inspector *Inspector) Stop() {
 	inspector.active = false
 }
 
+func (inspector *Inspector) StartInspection() {
+
+	// TODO: Implement inspection
+}
+
 func (inspector *Inspector) fetchPathRequests() error {
 
 	for inspector.active {
@@ -107,11 +115,28 @@ func (inspector *Inspector) fetchPathRequests() error {
 			inspector.HandlePathRequest(v)
 		}
 		if err != nil {
+			fmt.Printf("error polling path requests, err: %v\n", err)
 			return err
 		}
-		fmt.Printf("Handled %v requests\n", len(pathRequests))
+		fmt.Printf("Handled %v path requests\n", len(pathRequests))
 		time.Sleep(1 * time.Minute)
 	}
 
+	return nil
+}
+
+func (inspector *Inspector) fetchBrInfo() error {
+
+	for inspector.active {
+
+		err := inspector.brInfoFetcher.PollData()
+
+		if err != nil {
+			fmt.Printf("error polling border router information, err: %v\n", err)
+			return err
+		}
+		fmt.Printf("Polled %v border router information\n", len(inspector.brInfoFetcher.Info))
+		time.Sleep(30 * time.Second)
+	}
 	return nil
 }
