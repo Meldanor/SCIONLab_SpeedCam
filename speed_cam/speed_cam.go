@@ -21,8 +21,6 @@ import (
 	"fmt"
 	"github.com/c2h5oh/datasize"
 	"github.com/scionproto/scion/go/lib/addr"
-	"io/ioutil"
-	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -32,32 +30,44 @@ type SpeedCam struct {
 	isdAs    *addr.ISD_AS
 	duration time.Duration
 	start    time.Time
-
-	prometheusUrl string
 }
 
 func CreateSpeedCam(isdAs *addr.ISD_AS, duration time.Duration) *SpeedCam {
 	return &SpeedCam{isdAs: isdAs, duration: duration}
 }
 
-func (cam *SpeedCam) Start(prometheusUrl string, pollInterval time.Duration) ([]SpeedCamResult, error) {
+func (cam *SpeedCam) Measure(measurementPoints []PrometheusClientInfo, pollInterval time.Duration) map[addr.ISD_AS][]SpeedCamResult {
 
-	cam.prometheusUrl = prometheusUrl
 	cam.start = time.Now()
 
-	resultChannel := make(chan SpeedCamResult)
+	resultChannel := make(chan []SpeedCamResult, len(measurementPoints))
+	defer close(resultChannel)
 
-	go collectData(cam, pollInterval, resultChannel)
-
-	results := make([]SpeedCamResult, 0)
-
-	for e := range resultChannel {
-		results = append(results, e)
+	for _, v := range measurementPoints {
+		go cam.measureData(v, pollInterval, resultChannel)
 	}
 
-	results, err := differentiateResults(results)
+	time.Sleep(cam.duration + 5*time.Second)
+	resultMap := make(map[addr.ISD_AS][]SpeedCamResult)
+	for i := 0; i < len(measurementPoints); i++ {
+		resultsPerBr := <-resultChannel
+		brId := resultsPerBr[0].Source
+		resultMap[brId] = resultsPerBr
+	}
+	return resultMap
+}
 
-	return results, err
+func (cam *SpeedCam) measureData(measurementPoint PrometheusClientInfo, pollInterval time.Duration, resultChannel chan []SpeedCamResult) error {
+
+	results := collectData(cam, measurementPoint, pollInterval)
+	results, err := differentiateResults(results)
+	if err != nil {
+		fmt.Printf("error: %v", err)
+		return err
+	}
+
+	resultChannel <- results
+	return nil
 }
 
 func differentiateResults(results []SpeedCamResult) ([]SpeedCamResult, error) {
@@ -78,6 +88,7 @@ func differentiateResults(results []SpeedCamResult) ([]SpeedCamResult, error) {
 
 func differentiateResult(resultStart SpeedCamResult, resultEnd SpeedCamResult) SpeedCamResult {
 
+	result := SpeedCamResult{Neighbor: resultStart.Neighbor, Source: resultStart.Source}
 	// Prevent underflow
 	output := datasize.B
 	if resultStart.BandwidthOut > resultEnd.BandwidthOut {
@@ -96,56 +107,46 @@ func differentiateResult(resultStart SpeedCamResult, resultEnd SpeedCamResult) S
 
 	unixTime := (resultEnd.Timestamp.Unix() + resultStart.Timestamp.Unix()) / 2
 	timeStamp := time.Unix(unixTime, 0)
+	result.BandwidthOut = output
+	result.BandwidthIn = input
+	result.Timestamp = timeStamp
 
-	return SpeedCamResult{Timestamp: timeStamp, BandwidthOut: output, BandwidthIn: input}
+	return result
 }
 
-func collectData(cam *SpeedCam, pollInterval time.Duration, resultChannel chan SpeedCamResult) {
+func collectData(cam *SpeedCam, measurementPoint PrometheusClientInfo, pollInterval time.Duration) []SpeedCamResult {
 	end := cam.start.Add(cam.duration)
+	results := make([]SpeedCamResult, 0)
 	for {
+		url := measurementPoint.URL()
 
-		e, result := cam.pollData()
+		result := SpeedCamResult{Timestamp: time.Now(), BandwidthIn: 0, BandwidthOut: 0, Source: *cam.isdAs, Neighbor: measurementPoint.TargetIsdAs}
+		err := cam.pollData(url, &result)
 
-		if e != nil {
-			fmt.Errorf("error polling data. speedcam: %v, url: %v", cam.isdAs, cam.prometheusUrl)
+		if err != nil {
+			fmt.Printf("error polling data. speedcam: %v, url: %v", cam.isdAs, url)
+			continue
 		}
 
-		resultChannel <- result
+		results = append(results, result)
 		if time.Now().After(end) {
 			break
 		}
 
 		time.Sleep(pollInterval)
 	}
-	close(resultChannel)
+
+	return results
 }
 
-func (cam *SpeedCam) pollData() (error, SpeedCamResult) {
+func (cam *SpeedCam) pollData(prometheusUrl string, result *SpeedCamResult) error {
 
-	var result SpeedCamResult
-	client := http.Client{
-		Timeout: time.Second * 2, // Maximum of 2 secs
-	}
-
-	req, err := http.NewRequest(http.MethodGet, cam.prometheusUrl, nil)
+	readBytes, err := FetchData(prometheusUrl)
 	if err != nil {
-		return err, result
+		fmt.Printf("error polling data, err: %v\n", err)
+		return err
 	}
-
-	req.Header.Set("User-Agent", "speedcam-inspector")
-
-	res, getErr := client.Do(req)
-	if getErr != nil {
-		return getErr, result
-	}
-
-	body, readErr := ioutil.ReadAll(res.Body)
-	if readErr != nil {
-		return readErr, result
-	}
-
-	scanner := bufio.NewScanner(strings.NewReader(string(body)))
-	result = SpeedCamResult{Timestamp: time.Now(), BandwidthIn: 0, BandwidthOut: 0}
+	scanner := bufio.NewScanner(strings.NewReader(string(readBytes)))
 	for scanner.Scan() {
 		line := scanner.Text()
 		if strings.HasPrefix(line, "border_input_bytes_total") {
@@ -157,7 +158,7 @@ func (cam *SpeedCam) pollData() (error, SpeedCamResult) {
 		}
 	}
 
-	return nil, result
+	return nil
 }
 
 func parseValue(line string) uint64 {
@@ -171,4 +172,6 @@ type SpeedCamResult struct {
 	Timestamp    time.Time
 	BandwidthIn  datasize.ByteSize
 	BandwidthOut datasize.ByteSize
+	Source       addr.ISD_AS
+	Neighbor     addr.ISD_AS
 }

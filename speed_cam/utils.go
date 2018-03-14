@@ -16,28 +16,43 @@
 package speed_cam
 
 import (
-	"github.com/scionproto/scion/go/lib/addr"
-	"strconv"
+	"encoding/json"
+	"io/ioutil"
+	"net/http"
+	"time"
 )
 
-type PrometheusClientFetcher struct {
-	FetcherResource string
-	Info            []PrometheusClientInfo
+func FetchData(restResourceUrl string) ([]byte, error) {
+	var body []byte
+
+	client := http.Client{
+		Timeout: time.Second * 2, // Maximum of 2 secs
+	}
+
+	req, err := http.NewRequest(http.MethodGet, restResourceUrl, nil)
+	if err != nil {
+		return body, err
+	}
+
+	req.Header.Set("User-Agent", "speedcam-inspector")
+
+	res, err := client.Do(req)
+	if err != nil {
+		return body, err
+	}
+
+	body, err = ioutil.ReadAll(res.Body)
+	return body, err
 }
 
-func (fetcher *PrometheusClientFetcher) PollData() error {
+func FetchJsonData(restResourceUrl string, data interface{}) error {
 
-	err := FetchJsonData(fetcher.FetcherResource, fetcher.Info)
+	readBytes, err := FetchData(restResourceUrl)
+
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(readBytes, data)
 	return err
-}
-
-type PrometheusClientInfo struct {
-	Ip          string
-	Port        int
-	BrId        string
-	TargetIsdAs addr.ISD_AS
-}
-
-func (info *PrometheusClientInfo) URL() string {
-	return info.Ip + ":" + strconv.FormatInt(int64(info.Port), 10)
 }

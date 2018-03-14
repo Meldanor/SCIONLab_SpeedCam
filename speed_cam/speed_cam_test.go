@@ -21,6 +21,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 )
@@ -52,20 +53,25 @@ func TestFetchResult(t *testing.T) {
 	isdAs, _ := addr.IAFromString("1-10")
 	cam := CreateSpeedCam(isdAs, 9*time.Second)
 
-	results, err := cam.Start(ts.URL, 3*time.Second)
-
-	if err != nil {
-		t.Errorf("error: %v\n", err)
+	index := strings.LastIndex(ts.URL, ":")
+	ip := ts.URL[:index]
+	port, _ := strconv.ParseInt(ts.URL[index+1:], 10, 32)
+	measurementPoints := []PrometheusClientInfo{
+		{Ip: ip, Port: int(port), BrId: "1-10"},
 	}
+	resultMap := cam.Measure(measurementPoints, 3*time.Second)
 
 	expectedSpeedCamResults := []SpeedCamResult{
 		{BandwidthIn: 20619, BandwidthOut: 14278},
 		{BandwidthIn: 4474, BandwidthOut: 3894},
 		{BandwidthIn: 0, BandwidthOut: 0}}
 
+	ia, _ := addr.IAFromString("1-10")
+
+	results := resultMap[*ia]
 	for i := 0; i < 3; i++ {
 		result := expectedSpeedCamResults[i]
-		if result.BandwidthIn != results[i].BandwidthIn || result.BandwidthOut != result.BandwidthOut {
+		if result.BandwidthIn != results[i].BandwidthIn || result.BandwidthOut != results[i].BandwidthOut {
 			t.Errorf("Expected %v, but was %v\n", result, results[i])
 		}
 	}

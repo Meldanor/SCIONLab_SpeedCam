@@ -15,13 +15,6 @@
 // Package for a bandwidth regulation algorithm named SpeedCam. Further information here: URL_TO_THESIS
 package speed_cam
 
-import (
-	"encoding/json"
-	"io/ioutil"
-	"net/http"
-	"time"
-)
-
 type PathRequestFetcher interface {
 	FetchPathRequests() ([]string, error)
 }
@@ -33,41 +26,6 @@ type PathRequestRestFetcher struct {
 func (fetcher PathRequestRestFetcher) FetchPathRequests() ([]string, error) {
 
 	result := make([]string, 0)
-
-	data, err := fetcher.callResource()
-
-	if err != nil {
-		return result, err
-	}
-
-	err = json.Unmarshal(data, &result)
-
+	err := FetchJsonData(fetcher.FetchUrl, &result)
 	return result, err
-}
-
-func (fetcher *PathRequestRestFetcher) callResource() ([]byte, error) {
-
-	var body []byte
-	client := http.Client{
-		Timeout: time.Second * 2, // Maximum of 2 secs
-	}
-
-	req, err := http.NewRequest(http.MethodGet, fetcher.FetchUrl, nil)
-	if err != nil {
-		return body, err
-	}
-
-	req.Header.Set("User-Agent", "speedcam-inspector")
-
-	res, getErr := client.Do(req)
-	if getErr != nil {
-		return body, getErr
-	}
-
-	body, readErr := ioutil.ReadAll(res.Body)
-	if readErr != nil {
-		return body, readErr
-	}
-
-	return body, nil
 }
