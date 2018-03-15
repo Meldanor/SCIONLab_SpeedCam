@@ -17,10 +17,23 @@ package speed_cam
 
 import (
 	"encoding/json"
+	"github.com/op/go-logging"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"time"
 )
+
+var (
+	MyLogger = logging.MustGetLogger("speedcam")
+)
+
+func init() {
+	format := logging.MustStringFormatter(`%{color}%{time} %{shortfunc} %{level:.4s}%{color:reset} %{message}`)
+	backend := logging.NewLogBackend(os.Stderr, "", 0)
+	backendFormatter := logging.NewBackendFormatter(backend, format)
+	logging.SetBackend(backendFormatter)
+}
 
 func FetchData(restResourceUrl string) ([]byte, error) {
 	var body []byte

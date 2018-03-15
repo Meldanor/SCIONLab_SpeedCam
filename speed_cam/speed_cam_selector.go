@@ -16,7 +16,6 @@
 package speed_cam
 
 import (
-	"fmt"
 	"github.com/scionproto/scion/go/lib/addr"
 	"math"
 	"math/rand"
@@ -82,10 +81,13 @@ func (selector *SpeedCamSelector) selectCams(candidates map[addr.ISD_AS]*speedCa
 	var i int32 = 0
 
 	selectedCams := make(map[addr.ISD_AS]*speedCamCandidate)
+
+	for k, v := range candidates {
+		MyLogger.Debugf("Candidate: %v, chance: %.4f", k, v.score)
+	}
 	for k, v := range candidates {
 		// Is the speedCam selected?
 		chance := rand.Float64()
-		fmt.Println("chance: ", chance, " score: ", v.score)
 		if chance <= v.score {
 			// Add speedCam to selection
 			selectedCams[k] = v

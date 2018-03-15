@@ -62,7 +62,7 @@ func (cam *SpeedCam) measureData(measurementPoint PrometheusClientInfo, pollInte
 	results := collectData(cam, measurementPoint, pollInterval)
 	results, err := differentiateResults(results)
 	if err != nil {
-		fmt.Printf("error: %v", err)
+		MyLogger.Criticalf("error: %v", err)
 		return err
 	}
 
@@ -124,7 +124,7 @@ func collectData(cam *SpeedCam, measurementPoint PrometheusClientInfo, pollInter
 		err := cam.pollData(url, &result)
 
 		if err != nil {
-			fmt.Printf("error polling data. speedcam: %v, url: %v\n", cam.isdAs, url)
+			MyLogger.Criticalf("error polling data. speed cam: %v, url: %v\n", cam.isdAs, url)
 			continue
 		}
 
@@ -143,7 +143,7 @@ func (cam *SpeedCam) pollData(prometheusUrl string, result *SpeedCamResult) erro
 
 	readBytes, err := FetchData(prometheusUrl + "/metrics")
 	if err != nil {
-		fmt.Printf("error polling data, err: %v\n", err)
+		MyLogger.Criticalf("error polling data, err: %v\n", err)
 		return err
 	}
 	scanner := bufio.NewScanner(strings.NewReader(string(readBytes)))

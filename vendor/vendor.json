@@ -9,6 +9,12 @@
 			"revisionTime": "2017-12-27T19:17:56Z"
 		},
 		{
+			"checksumSHA1": "BoXdUBWB8UnSlFlbnuTQaPqfCGk=",
+			"path": "github.com/op/go-logging",
+			"revision": "970db520ece77730c7e4724c61121037378659d9",
+			"revisionTime": "2016-03-15T20:05:05Z"
+		},
+		{
 			"checksumSHA1": "1MTu+8zeeFbuG8LD8z4TI09hZ6g=",
 			"path": "github.com/perrig/scionlab/bwtester",
 			"revision": "5388d9a4a2de6c35f22b2776442a5168d777d6c0",

@@ -20,8 +20,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"flag"
-	"fmt"
-	"github.com/Meldanor/SCIONLab_SpeedCam/speed_cam"
+	sc "github.com/Meldanor/SCIONLab_SpeedCam/speed_cam"
 	"github.com/scionproto/scion/go/lib/addr"
 	"io/ioutil"
 	"log"
@@ -39,64 +38,10 @@ import (
 var (
 	scionDir = flag.String("scionDir", "", "Path to SCION root dir")
 
-	brInfos      []speed_cam.PrometheusClientInfo
+	// mock variables - the external server should handle them in a real application
+	brInfos      []sc.PrometheusClientInfo
 	pathRequests = make(map[string]bool)
 )
-
-// Mock a simple HTTP server to serving the data
-func handler(w http.ResponseWriter, r *http.Request) {
-
-	method := r.Method
-	path := r.URL.Path
-	if path == "/pathServerRequests" {
-		if method == "POST" {
-			handlePostPathRequests(r)
-		} else if method == "GET" {
-			handleGetPathRequests(w)
-		}
-	} else if path == "/prometheusClient" {
-		if method == "GET" {
-			handleGetPrometheusClient(w)
-		} else {
-			fmt.Println("POST /prometheusClient unsupported")
-		}
-	}
-}
-
-func handleGetPathRequests(w http.ResponseWriter) {
-
-	result := make([]string, 0)
-
-	for k := range pathRequests {
-		result = append(result, k)
-	}
-
-	jsonString, err := json.Marshal(result)
-	if err != nil {
-		fmt.Printf("error marshalling path requests, err: %v", err)
-		return
-	}
-	w.Write(jsonString)
-}
-
-func handlePostPathRequests(r *http.Request) {
-	decoder := json.NewDecoder(r.Body)
-	var list []string
-	decoder.Decode(&list)
-
-	for _, v := range list {
-		pathRequests[v] = true
-	}
-}
-
-func handleGetPrometheusClient(w http.ResponseWriter) {
-	jsonString, err := json.Marshal(brInfos)
-	if err != nil {
-		fmt.Printf("error marshalling border router information, err: %v", err)
-		return
-	}
-	w.Write(jsonString)
-}
 
 func main() {
 
@@ -106,7 +51,7 @@ func main() {
 	flag.Parse()
 
 	if len(*scionDir) == 0 {
-		fmt.Printf("missing '-scionDir' parameter\n")
+		sc.MyLogger.Criticalf("missing '-scionDir' parameter\n")
 		return
 	}
 
@@ -128,25 +73,80 @@ func main() {
 		}
 	}()
 
-	fmt.Println("Wait 2 seconds to populate the data")
+	sc.MyLogger.Debug("Wait 2 seconds to populate the data...")
 	time.Sleep(2 * time.Second)
 	// Initiate the speed cam algorithm
-	inspector := speed_cam.CreateEmptyGraph(speed_cam.Default())
-	requestRestFetcher := speed_cam.PathRequestRestFetcher{FetchUrl: ts.URL + "/pathServerRequests"}
-	borderRouterInfoFetcher := speed_cam.PrometheusClientFetcher{FetcherResource: ts.URL + "/prometheusClient"}
+	inspector := sc.CreateEmptyGraph(sc.Default())
+	requestRestFetcher := sc.PathRequestRestFetcher{FetchUrl: ts.URL + "/pathServerRequests"}
+	borderRouterInfoFetcher := sc.PrometheusClientFetcher{FetcherResource: ts.URL + "/prometheusClient"}
 
 	//Start speed cam algorithm
 	go inspector.Start(requestRestFetcher, borderRouterInfoFetcher)
 
-	fmt.Println("Wait 2 seconds before starting the inspection")
+	sc.MyLogger.Debug("Wait 2 seconds before starting the inspection...")
 	time.Sleep(2 * time.Second)
 
-	fmt.Println("Starting loop...")
+	sc.MyLogger.Debug("Starting inspection loop...")
 	for {
 		inspector.StartInspection()
 		time.Sleep(10 * time.Second)
 	}
-	fmt.Println("Finished loop!")
+	sc.MyLogger.Debug("Finished loop!")
+}
+
+// Mock a simple HTTP server to serving the data
+func handler(w http.ResponseWriter, r *http.Request) {
+
+	method := r.Method
+	path := r.URL.Path
+	if path == "/pathServerRequests" {
+		if method == "POST" {
+			handlePostPathRequests(r)
+		} else if method == "GET" {
+			handleGetPathRequests(w)
+		}
+	} else if path == "/prometheusClient" {
+		if method == "GET" {
+			handleGetPrometheusClient(w)
+		} else {
+			sc.MyLogger.Criticalf("POST /prometheusClient unsupported")
+		}
+	}
+}
+
+func handleGetPathRequests(w http.ResponseWriter) {
+
+	result := make([]string, 0)
+
+	for k := range pathRequests {
+		result = append(result, k)
+	}
+
+	jsonString, err := json.Marshal(result)
+	if err != nil {
+		sc.MyLogger.Criticalf("error marshalling path requests, err: %v", err)
+		return
+	}
+	w.Write(jsonString)
+}
+
+func handlePostPathRequests(r *http.Request) {
+	decoder := json.NewDecoder(r.Body)
+	var list []string
+	decoder.Decode(&list)
+
+	for _, v := range list {
+		pathRequests[v] = true
+	}
+}
+
+func handleGetPrometheusClient(w http.ResponseWriter) {
+	jsonString, err := json.Marshal(brInfos)
+	if err != nil {
+		sc.MyLogger.Criticalf("error marshalling border router information, err: %v", err)
+		return
+	}
+	w.Write(jsonString)
 }
 
 func pathServerFetching(logDir string, url string) {
@@ -159,12 +159,12 @@ func pathServerFetching(logDir string, url string) {
 	}
 }
 
-func parseBrInformation(genDir string) []speed_cam.PrometheusClientInfo {
+func parseBrInformation(genDir string) []sc.PrometheusClientInfo {
 
-	var locBrInfos []speed_cam.PrometheusClientInfo
+	var locBrInfos []sc.PrometheusClientInfo
 	regex, err := regexp.Compile("br\\d+-\\d+-\\d+$")
 	if err != nil {
-		fmt.Printf("error regex %v", err)
+		sc.MyLogger.Criticalf("error regex %v", err)
 		return locBrInfos
 	}
 	brFiles := make([]brFile, 0)
@@ -185,12 +185,12 @@ func parseBrInformation(genDir string) []speed_cam.PrometheusClientInfo {
 	})
 
 	if err != nil {
-		fmt.Printf("error wlking the path %q: %v\n", genDir, err)
+		sc.MyLogger.Criticalf("error walking the path %q: %v\n", genDir, err)
 		return locBrInfos
 	}
 
 	// Parse information from config files
-	locBrInfos = make([]speed_cam.PrometheusClientInfo, 0)
+	locBrInfos = make([]sc.PrometheusClientInfo, 0)
 	for _, v := range brFiles {
 		locBrInfos = append(locBrInfos, parseBrFiles(v))
 	}
@@ -202,9 +202,9 @@ type brFile struct {
 	topologyFile string
 }
 
-func parseBrFiles(brInfoFile brFile) speed_cam.PrometheusClientInfo {
+func parseBrFiles(brInfoFile brFile) sc.PrometheusClientInfo {
 
-	info := speed_cam.PrometheusClientInfo{}
+	info := sc.PrometheusClientInfo{}
 
 	parseBrConfigFile(brInfoFile.configFile, &info)
 	parseBrTopologyFile(brInfoFile.topologyFile, &info)
@@ -212,12 +212,12 @@ func parseBrFiles(brInfoFile brFile) speed_cam.PrometheusClientInfo {
 	return info
 }
 
-func parseBrConfigFile(brConfigFilePath string, info *speed_cam.PrometheusClientInfo) {
+func parseBrConfigFile(brConfigFilePath string, info *sc.PrometheusClientInfo) {
 
 	readBytes, err := ioutil.ReadFile(brConfigFilePath)
 	if err != nil {
-		fmt.Printf("error reading config file '%v', err: %v\n", brConfigFilePath, err)
-
+		sc.MyLogger.Criticalf("error reading config file '%v', err: %v\n", brConfigFilePath, err)
+		return
 	}
 
 	scanner := bufio.NewScanner(strings.NewReader(string(readBytes)))
@@ -234,7 +234,7 @@ func parseBrConfigFile(brConfigFilePath string, info *speed_cam.PrometheusClient
 			info.Ip = "http://" + split[0]
 			info.Port, err = strconv.Atoi(split[1])
 			if err != nil {
-				fmt.Printf("error parsing port in string '%v' ; err: %v", ipPort, err)
+				sc.MyLogger.Criticalf("error parsing port in string '%v' ; err: %v", ipPort, err)
 			}
 
 			break
@@ -246,12 +246,12 @@ func extractCommandInfo(line string, command string, config string) string {
 	cmdStr := "-" + command + "="
 	indexStart := strings.Index(line, cmdStr)
 	if indexStart == -1 {
-		fmt.Printf("no '%v' parameter in config '%v'\n", cmdStr, config)
+		sc.MyLogger.Criticalf("no '%v' parameter in config '%v'\n", cmdStr, config)
 		return ""
 	}
 	indexEnd := strings.Index(line[indexStart:], "\" ")
 	if indexEnd == -1 {
-		fmt.Printf("no '%v' parameter in config '%v'\n", cmdStr, config)
+		sc.MyLogger.Criticalf("no '%v' parameter in config '%v'\n", cmdStr, config)
 		return ""
 	}
 
@@ -261,12 +261,12 @@ func extractCommandInfo(line string, command string, config string) string {
 	return line[indexStart:indexEnd]
 }
 
-func parseBrTopologyFile(topologyFile string, info *speed_cam.PrometheusClientInfo) {
+func parseBrTopologyFile(topologyFile string, info *sc.PrometheusClientInfo) {
 
 	readBytes, err := ioutil.ReadFile(topologyFile)
 
 	if err != nil {
-		fmt.Printf("error reading topology file '%v', err: %v\n", topologyFile, err)
+		sc.MyLogger.Criticalf("error reading topology file '%v', err: %v\n", topologyFile, err)
 		return
 	}
 
@@ -274,7 +274,7 @@ func parseBrTopologyFile(topologyFile string, info *speed_cam.PrometheusClientIn
 	err = json.Unmarshal(readBytes, &root)
 
 	if err != nil {
-		fmt.Printf("error reading topology file '%v', err: %v\n", topologyFile, err)
+		sc.MyLogger.Criticalf("error reading topology file '%v', err: %v\n", topologyFile, err)
 		return
 	}
 	sourceIsdAs, _ := addr.IAFromString(root["ISD_AS"].(string))
@@ -284,7 +284,7 @@ func parseBrTopologyFile(topologyFile string, info *speed_cam.PrometheusClientIn
 	borderRouterInfoObject := borderRouters[info.BrId].(map[string]interface{})
 	interfacesObject := borderRouterInfoObject["Interfaces"].(map[string]interface{})
 	if len(interfacesObject) > 1 {
-		fmt.Printf("error parsing topology file '%v', too many interfaces!", topologyFile)
+		sc.MyLogger.Criticalf("error parsing topology file '%v', too many interfaces!", topologyFile)
 		return
 	}
 	for _, v := range interfacesObject {

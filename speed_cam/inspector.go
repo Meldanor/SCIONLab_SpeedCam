@@ -102,7 +102,7 @@ func (inspector *Inspector) Stop() {
 
 func (inspector *Inspector) StartInspection() {
 
-	fmt.Printf("Start inspection!\n")
+	MyLogger.Debug("Start inspection!\n")
 	selector := Create(inspector.config)
 	selectSpeedCams := selector.SelectSpeedCams(inspector.graph)
 	clientInfos := inspector.brInfoFetcher.Info
@@ -113,10 +113,10 @@ func (inspector *Inspector) StartInspection() {
 	defer close(resultChannel)
 
 	for _, selectedSpeedCam := range selectSpeedCams {
-		fmt.Printf("Initiate speed cam on '%v'\n", selectedSpeedCam.IsdAs)
+		MyLogger.Debugf("Initiate speed cam on '%v'\n", selectedSpeedCam.IsdAs)
 		info := clientInfoGrouped[selectedSpeedCam.IsdAs]
 		speedCam := CreateSpeedCam(selectedSpeedCam.IsdAs, 30*time.Second)
-		fmt.Printf("Start speed cam on '%v' for 30 seconds\n", selectedSpeedCam.IsdAs)
+		MyLogger.Debugf("Start speed cam on '%v' for 30 seconds\n", selectedSpeedCam.IsdAs)
 		go func(cam *SpeedCam, c chan map[addr.ISD_AS][]SpeedCamResult) {
 
 			c <- cam.Measure(info, 5*time.Second)
@@ -125,16 +125,16 @@ func (inspector *Inspector) StartInspection() {
 
 	for i := 0; i < size; i++ {
 		measureResults := <-resultChannel
-		fmt.Printf("Results of %v: \n", i+1)
+		MyLogger.Debugf("Results of %v: \n", i+1)
 		for k, v := range measureResults {
-			fmt.Printf("\tResults for %v:\n", k)
+			MyLogger.Debugf("\tResults for %v:\n", k)
 			for _, result := range v {
-				fmt.Printf("\t\tLink: %v<->%v Timestamp: %v, In: %v/s, Out: %v/s\n",
-					result.Source, result.Neighbor, result.Timestamp, result.BandwidthIn.HR(), result.BandwidthOut.HR())
+				MyLogger.Debugf("\t\tLink: %v<->%v Timestamp: %v, In: %v/s, Out: %v/s\n",
+					result.Neighbor, result.Source, result.Timestamp, result.BandwidthIn.HR(), result.BandwidthOut.HR())
 			}
 		}
 	}
-	fmt.Printf("Inspection finished!\n")
+	MyLogger.Debugf("Inspection finished!\n")
 }
 
 func groupBySource(clientInfos []PrometheusClientInfo) map[addr.ISD_AS][]PrometheusClientInfo {
@@ -158,10 +158,10 @@ func (inspector *Inspector) fetchPathRequests() error {
 			inspector.HandlePathRequest(v)
 		}
 		if err != nil {
-			fmt.Printf("error polling path requests, err: %v\n", err)
+			MyLogger.Criticalf("error polling path requests, err: %v\n", err)
 			return err
 		}
-		fmt.Printf("Handled %v path requests\n", len(pathRequests))
+		MyLogger.Debugf("Handled %v path requests\n", len(pathRequests))
 		time.Sleep(5 * time.Minute)
 	}
 
@@ -175,10 +175,10 @@ func (inspector *Inspector) fetchBrInfo() error {
 		err := inspector.brInfoFetcher.PollData()
 
 		if err != nil {
-			fmt.Printf("error polling border router information, err: %v\n", err)
+			MyLogger.Criticalf("error polling border router information, err: %v\n", err)
 			return err
 		}
-		fmt.Printf("Polled %v border router information\n", len(inspector.brInfoFetcher.Info))
+		MyLogger.Debugf("Polled %v border router information\n", len(inspector.brInfoFetcher.Info))
 		time.Sleep(5 * time.Minute)
 	}
 	return nil
