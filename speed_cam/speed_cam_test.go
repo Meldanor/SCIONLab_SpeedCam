@@ -50,14 +50,15 @@ func TestFetchResult(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(servePrometheusResults))
 	defer ts.Close()
 
-	isdAs, _ := addr.IAFromString("1-10")
-	cam := CreateSpeedCam(isdAs, 9*time.Second)
+	sourceIsdAs, _ := addr.IAFromString("1-10")
+	targetIsdAs, _ := addr.IAFromString("1-11")
+	cam := CreateSpeedCam(*sourceIsdAs, 9*time.Second)
 
 	index := strings.LastIndex(ts.URL, ":")
 	ip := ts.URL[:index]
 	port, _ := strconv.ParseInt(ts.URL[index+1:], 10, 32)
 	measurementPoints := []PrometheusClientInfo{
-		{Ip: ip, Port: int(port), BrId: "1-10"},
+		{Ip: ip, Port: int(port), BrId: "1-10-1", SourceIsdAs: *sourceIsdAs, TargetIsdAs: *targetIsdAs},
 	}
 	resultMap := cam.Measure(measurementPoints, 3*time.Second)
 
@@ -66,9 +67,7 @@ func TestFetchResult(t *testing.T) {
 		{BandwidthIn: 4474, BandwidthOut: 3894},
 		{BandwidthIn: 0, BandwidthOut: 0}}
 
-	ia, _ := addr.IAFromString("1-10")
-
-	results := resultMap[*ia]
+	results := resultMap[*targetIsdAs]
 	for i := 0; i < 3; i++ {
 		result := expectedSpeedCamResults[i]
 		if result.BandwidthIn != results[i].BandwidthIn || result.BandwidthOut != results[i].BandwidthOut {
