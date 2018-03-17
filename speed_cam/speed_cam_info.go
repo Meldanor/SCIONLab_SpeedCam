@@ -104,7 +104,7 @@ func (scInfo *speedCamInfo) GetActivity() float64 {
 
 	// Avoid "divided by zero"
 	if totalCapacity == 0 {
-		return 0.0
+		return float64(sum)
 	}
 
 	return float64(sum) / float64(totalCapacity)

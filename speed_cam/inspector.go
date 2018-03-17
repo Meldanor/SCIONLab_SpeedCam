@@ -18,6 +18,7 @@ package speed_cam
 import (
 	"errors"
 	"fmt"
+	"github.com/c2h5oh/datasize"
 	"github.com/scionproto/scion/go/lib/addr"
 	"regexp"
 	"time"
@@ -102,7 +103,9 @@ func (inspector *Inspector) Stop() {
 
 func (inspector *Inspector) StartInspection() {
 
+	startTime := time.Now()
 	MyLogger.Debug("Start inspection!\n")
+
 	selector := Create(inspector.config)
 	selectSpeedCams := selector.SelectSpeedCams(inspector.graph)
 	clientInfos := inspector.brInfoFetcher.Info
@@ -112,10 +115,11 @@ func (inspector *Inspector) StartInspection() {
 	resultChannel := make(chan map[addr.ISD_AS][]SpeedCamResult, size)
 	defer close(resultChannel)
 
+	inspectionDuration := 30 * time.Second
 	for _, selectedSpeedCam := range selectSpeedCams {
 		MyLogger.Debugf("Initiate speed cam on '%v'\n", selectedSpeedCam.IsdAs)
 		info := clientInfoGrouped[selectedSpeedCam.IsdAs]
-		speedCam := CreateSpeedCam(selectedSpeedCam.IsdAs, 30*time.Second)
+		speedCam := CreateSpeedCam(selectedSpeedCam.IsdAs, inspectionDuration)
 		MyLogger.Debugf("Start speed cam on '%v' for 30 seconds\n", selectedSpeedCam.IsdAs)
 		go func(cam *SpeedCam, c chan map[addr.ISD_AS][]SpeedCamResult) {
 
@@ -123,8 +127,19 @@ func (inspector *Inspector) StartInspection() {
 		}(speedCam, resultChannel)
 	}
 
+	var inspectionResults []map[addr.ISD_AS][]SpeedCamResult
 	for i := 0; i < size; i++ {
-		measureResults := <-resultChannel
+		inspectionResults = append(inspectionResults, <-resultChannel)
+	}
+	inspector.aggregateResults(inspectionResults, startTime, inspectionDuration)
+	presentResults(inspectionResults)
+	MyLogger.Debugf("Inspection finished!\n")
+}
+
+func presentResults(results []map[addr.ISD_AS][]SpeedCamResult) {
+
+	for i := 0; i < len(results); i++ {
+		measureResults := results[i]
 		MyLogger.Debugf("Results of %v: \n", i+1)
 		for k, v := range measureResults {
 			MyLogger.Debugf("\tResults for %v:\n", k)
@@ -134,7 +149,41 @@ func (inspector *Inspector) StartInspection() {
 			}
 		}
 	}
-	MyLogger.Debugf("Inspection finished!\n")
+}
+
+func (inspector *Inspector) aggregateResults(results []map[addr.ISD_AS][]SpeedCamResult, start time.Time,
+	inspectionDuration time.Duration) {
+
+	bandwidthPerNode := make(map[addr.ISD_AS]datasize.ByteSize)
+
+	for _, m := range results {
+		for _, v := range m {
+
+			for _, result := range v {
+				sourceBandwidth, exists := bandwidthPerNode[result.Source]
+				if !exists {
+					sourceBandwidth = 0
+				}
+				sourceBandwidth += datasize.ByteSize(uint64(result.BandwidthOut) / uint64(len(v)))
+				bandwidthPerNode[result.Source] = sourceBandwidth
+
+				targetBandwidth, exists := bandwidthPerNode[result.Neighbor]
+				if !exists {
+					targetBandwidth = 0
+				}
+				targetBandwidth += datasize.ByteSize(uint64(result.BandwidthIn) / uint64(len(v)))
+				bandwidthPerNode[result.Neighbor] = targetBandwidth
+			}
+		}
+	}
+
+	for key, v := range bandwidthPerNode {
+		info := inspector.graph.nodes[key].info
+		MyLogger.Debugf("Add activity to node '%v', start time: %v, duration: %v, average bytes/s: %v",
+			key, start, inspectionDuration, v.HR())
+		info.AddActivity(start, inspectionDuration, v)
+	}
+
 }
 
 func groupBySource(clientInfos []PrometheusClientInfo) map[addr.ISD_AS][]PrometheusClientInfo {
