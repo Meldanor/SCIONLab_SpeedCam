@@ -77,8 +77,8 @@ func (selector *SpeedCamSelector) normalizeScores(candidates map[addr.ISD_AS]*sp
 func (selector *SpeedCamSelector) selectCams(candidates map[addr.ISD_AS]*speedCamCandidate) []networkNode {
 
 	// Select m + log(n) nodes; m=additional amount (can be negative); n=amount of nodes
-	count := selector.config.SpeedCamDiff + int32(math.Ceil(math.Log10(float64(len(candidates)))))
-	var i int32 = 0
+	count := selector.config.SpeedCamDiff + int(math.Ceil(math.Log10(float64(len(candidates)))))
+	var i = 0
 
 	selectedCams := make(map[addr.ISD_AS]*speedCamCandidate)
 

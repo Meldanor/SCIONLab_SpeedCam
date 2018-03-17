@@ -36,7 +36,15 @@ import (
 )
 
 var (
-	scionDir = flag.String("scionDir", "", "Path to SCION root dir")
+	defaultConfig = sc.Default()
+	scionDir      = flag.String("scionDir", "", "Path to SCION root dir")
+
+	episodesFlag     = flag.Int("cEpisodes", defaultConfig.Episodes, "The amount of past episodes to save")
+	wDegreeFlag      = flag.Float64("cWDegree", defaultConfig.WeightDegree, "The weight for the degree")
+	wCapacityFlag    = flag.Float64("cWCapacity", defaultConfig.WeightCapacity, "The weight for the capacity")
+	wSuccessFlag     = flag.Float64("cWSuccess", defaultConfig.WeightSuccess, "The weight for the success")
+	wActivityFlag    = flag.Float64("cWActivity", defaultConfig.WeightActivity, "The weight for the activity")
+	speedCamDiffFlag = flag.Int("cSpeedCamDiff", defaultConfig.SpeedCamDiff, "Additional or fewer speed cams per episode")
 
 	// mock variables - the external server should handle them in a real application
 	brInfos      []sc.PrometheusClientInfo
@@ -54,6 +62,9 @@ func main() {
 		sc.MyLogger.Criticalf("missing '-scionDir' parameter\n")
 		return
 	}
+
+	config := getConfig()
+	sc.MyLogger.Debugf("Config: %v\n", config)
 
 	// parse path requests every minute and send it to mock local HTTP server
 	go func() {
@@ -76,7 +87,7 @@ func main() {
 	sc.MyLogger.Debug("Wait 2 seconds to populate the data...")
 	time.Sleep(2 * time.Second)
 	// Initiate the speed cam algorithm
-	inspector := sc.CreateEmptyGraph(sc.Default())
+	inspector := sc.CreateEmptyGraph(config)
 	requestRestFetcher := sc.PathRequestRestFetcher{FetchUrl: ts.URL + "/pathServerRequests"}
 	borderRouterInfoFetcher := sc.PrometheusClientFetcher{FetcherResource: ts.URL + "/prometheusClient"}
 
@@ -92,6 +103,16 @@ func main() {
 		time.Sleep(10 * time.Second)
 	}
 	sc.MyLogger.Debug("Finished loop!")
+}
+
+func getConfig() *sc.SpeedCamConfig {
+	return &sc.SpeedCamConfig{
+		Episodes:       *episodesFlag,
+		WeightDegree:   *wDegreeFlag,
+		WeightCapacity: *wCapacityFlag,
+		WeightSuccess:  *wSuccessFlag,
+		WeightActivity: *wActivityFlag,
+		SpeedCamDiff:   *speedCamDiffFlag}
 }
 
 // Mock a simple HTTP server to serving the data

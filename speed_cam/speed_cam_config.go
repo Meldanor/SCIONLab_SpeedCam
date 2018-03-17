@@ -15,6 +15,8 @@
 // Package for a bandwidth regulation algorithm named SpeedCam. Further information here: URL_TO_THESIS
 package speed_cam
 
+import "fmt"
+
 // Configuration for the SpeedCam algorithm
 type SpeedCamConfig struct {
 	// Amount of previous episodes to store per node
@@ -28,7 +30,7 @@ type SpeedCamConfig struct {
 	// The importance for node's activity rate to be selected
 	WeightActivity float64
 	// Additional or fewer SpeedCams to be selected
-	SpeedCamDiff int32
+	SpeedCamDiff int
 }
 
 // Default values for the algorithm.
@@ -42,4 +44,10 @@ func Default() *SpeedCamConfig {
 	config.SpeedCamDiff = 0
 
 	return config
+}
+
+func (config *SpeedCamConfig) String() string {
+	return fmt.Sprintf("{Episodes: %v, wDegree: %v, wCapacity: %v, wSuccess: %v, wActivity: %v, SpeedCamDiff: %v}",
+		config.Episodes, config.WeightDegree, config.WeightCapacity, config.WeightSuccess, config.WeightActivity,
+		config.SpeedCamDiff)
 }
