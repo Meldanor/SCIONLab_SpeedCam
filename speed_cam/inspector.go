@@ -133,6 +133,8 @@ func (inspector *Inspector) StartInspection() {
 	}
 	inspector.aggregateResults(inspectionResults, startTime, inspectionDuration)
 	presentResults(inspectionResults)
+	serializeResult := SerializableResult(inspector, inspectionResults, startTime, inspectionDuration)
+	serializeResult.writeJsonResult("/tmp/scresults")
 	MyLogger.Debugf("Inspection finished!\n")
 }
 
