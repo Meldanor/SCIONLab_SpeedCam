@@ -92,6 +92,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	method := r.Method
 	if r.URL.Path == "/index.html" && method == "GET" {
+		w.Header().Set("Content-Type", "text/html")
 		readBytes, _ := ioutil.ReadFile(*indexHtmlFile)
 		w.Write(readBytes)
 		return
