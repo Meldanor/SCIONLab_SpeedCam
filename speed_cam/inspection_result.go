@@ -97,7 +97,7 @@ func (result *InspectionResult) writeJsonResult(dir string) {
 
 	// Format: YYYYMMDD_HHmmss
 	dateFormat := "20060102_150405"
-	path := fmt.Sprintf("%v/%v.json", dir, time.Now().Format(dateFormat))
+	path := fmt.Sprintf("%v/%v.json", dir, result.Start.Format(dateFormat))
 	MyLogger.Debugf("Start writing result as json file %v...", path)
 
 	data, err := json.Marshal(result)
