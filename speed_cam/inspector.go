@@ -19,6 +19,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/c2h5oh/datasize"
+	"github.com/op/go-logging"
 	"github.com/scionproto/scion/go/lib/addr"
 	"regexp"
 	"time"
@@ -43,6 +44,11 @@ func CreateWithGraph(config *SpeedCamConfig, graph *NetworkGraph) *Inspector {
 	inspector := new(Inspector)
 	inspector.config = config
 	inspector.graph = graph
+
+	// Disable debug logging
+	if !config.Verbose {
+		logging.SetLevel(logging.INFO, "speedcam")
+	}
 
 	return inspector
 }
@@ -133,8 +139,11 @@ func (inspector *Inspector) StartInspection() {
 	}
 	inspector.aggregateResults(inspectionResults, startTime, inspectionDuration)
 	presentResults(inspectionResults)
-	serializeResult := SerializableResult(inspector, inspectionResults, startTime, inspectionDuration)
-	serializeResult.writeJsonResult("/tmp/scresults")
+	// If a result dir was specified -> write results to it
+	if len(inspector.config.ResultDir) != 0 {
+		serializeResult := SerializableResult(inspector, inspectionResults, startTime, inspectionDuration)
+		serializeResult.writeJsonResult(inspector.config.ResultDir)
+	}
 	MyLogger.Debugf("Inspection finished!\n")
 }
 

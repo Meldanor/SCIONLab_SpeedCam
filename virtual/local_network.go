@@ -45,6 +45,8 @@ var (
 	wSuccessFlag     = flag.Float64("cWSuccess", defaultConfig.WeightSuccess, "The weight for the success")
 	wActivityFlag    = flag.Float64("cWActivity", defaultConfig.WeightActivity, "The weight for the activity")
 	speedCamDiffFlag = flag.Int("cSpeedCamDiff", defaultConfig.SpeedCamDiff, "Additional or fewer speed cams per episode")
+	verboseFlag      = flag.Bool("verbose", defaultConfig.Verbose, "Additional output")
+	resultDirFlag    = flag.String("resultDir", defaultConfig.ResultDir, "Write inspection results to that dir")
 
 	// mock variables - the external server should handle them in a real application
 	brInfos      []sc.PrometheusClientInfo
@@ -59,6 +61,7 @@ func main() {
 	flag.Parse()
 
 	if len(*scionDir) == 0 {
+		flag.Usage()
 		sc.MyLogger.Criticalf("missing '-scionDir' parameter\n")
 		return
 	}
@@ -112,7 +115,9 @@ func getConfig() *sc.SpeedCamConfig {
 		WeightCapacity: *wCapacityFlag,
 		WeightSuccess:  *wSuccessFlag,
 		WeightActivity: *wActivityFlag,
-		SpeedCamDiff:   *speedCamDiffFlag}
+		SpeedCamDiff:   *speedCamDiffFlag,
+		Verbose:        *verboseFlag,
+		ResultDir:      *resultDirFlag}
 }
 
 // Mock a simple HTTP server to serving the data

@@ -15,7 +15,9 @@
 // Package for a bandwidth regulation algorithm named SpeedCam. Further information here: URL_TO_THESIS
 package speed_cam
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // Configuration for the SpeedCam algorithm
 type SpeedCamConfig struct {
@@ -31,6 +33,10 @@ type SpeedCamConfig struct {
 	WeightActivity float64
 	// Additional or fewer SpeedCams to be selected
 	SpeedCamDiff int
+	// If enabled, there will be additional console output
+	Verbose bool
+	// If it is an non empty string, the inspector will write the results to this dir as JSON files
+	ResultDir string
 }
 
 // Default values for the algorithm.
@@ -42,12 +48,14 @@ func Default() *SpeedCamConfig {
 	config.WeightSuccess = 1.0
 	config.WeightActivity = 1.0
 	config.SpeedCamDiff = 0
+	config.Verbose = true
+	config.ResultDir = ""
 
 	return config
 }
 
 func (config *SpeedCamConfig) String() string {
-	return fmt.Sprintf("{Episodes: %v, wDegree: %v, wCapacity: %v, wSuccess: %v, wActivity: %v, SpeedCamDiff: %v}",
+	return fmt.Sprintf("{Episodes: %v, wDegree: %v, wCapacity: %v, wSuccess: %v, wActivity: %v, SpeedCamDiff: %v, Verbose: %v, ResultDir: %v}",
 		config.Episodes, config.WeightDegree, config.WeightCapacity, config.WeightSuccess, config.WeightActivity,
-		config.SpeedCamDiff)
+		config.SpeedCamDiff, config.Verbose, config.ResultDir)
 }
