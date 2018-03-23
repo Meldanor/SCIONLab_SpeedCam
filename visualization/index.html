@@ -67,6 +67,8 @@ limitations under the License.
                         <dd class="col-sm-8" id="node-data-avg-bytes"></dd>
                         <dt class="col-sm-4">Speed cam?</dt>
                         <dd class="col-sm-8" id="node-data-speed-cam"></dd>
+                        <dt class="col-sm-4">Score</dt>
+                        <dd class="col-sm-8" id="node-data-candidate-score"></dd>
                     </dl>
                 </div>
             </div>
@@ -145,6 +147,8 @@ limitations under the License.
         d3.select("#node-data-isd-as").text(data.Id);
         d3.select("#node-data-avg-bytes").text(bytesToString(data.AvgBytes) + "/s");
         d3.select("#node-data-speed-cam").text(data.WasSpeedCam);
+
+        d3.select("#node-data-candidate-score").text(data.CandidateScore);
     }
 
     function bytesToString(bytes) {

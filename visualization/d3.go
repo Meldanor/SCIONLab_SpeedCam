@@ -157,7 +157,7 @@ func createNodeData(result speed_cam.InspectionResult) []NodeData {
 	var nodeDataSlice []NodeData
 
 	for k, v := range result.Graph {
-		nodeData := NodeData{Id: k.String(), Degree: v.Degree}
+		nodeData := NodeData{Id: k.String(), Degree: v.Degree, CandidateScore: uint(v.CandidateScore)}
 		nodeIsdAs, _ := addr.IAFromString(nodeData.Id)
 		n := 0
 		bandwidth := datasize.B
