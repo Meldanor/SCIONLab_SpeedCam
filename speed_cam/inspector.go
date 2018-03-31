@@ -132,6 +132,7 @@ func (inspector *Inspector) StartInspection() {
 		if !exists {
 			MyLogger.Warningf("No prometheus info found for selected speed cam '%v'! This AS is skipped!",
 				selectedSpeedCam.IsdAs)
+			size--
 			continue
 		}
 		speedCam := CreateSpeedCam(selectedSpeedCam.IsdAs, inspectionDuration)
