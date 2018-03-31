@@ -40,5 +40,5 @@ type PrometheusClientInfo struct {
 }
 
 func (info *PrometheusClientInfo) URL() string {
-	return info.Ip + ":" + strconv.FormatInt(int64(info.Port), 10)
+	return "http://" + info.Ip + ":" + strconv.FormatInt(int64(info.Port), 10)
 }

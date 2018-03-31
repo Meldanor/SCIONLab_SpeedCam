@@ -257,7 +257,7 @@ func parseBrConfigFile(brConfigFilePath string, info *sc.PrometheusClientInfo) {
 
 			info.BrId = brId
 			split := strings.Split(ipPort, ":")
-			info.Ip = "http://" + split[0]
+			info.Ip = split[0]
 			info.Port, err = strconv.Atoi(split[1])
 			if err != nil {
 				sc.MyLogger.Criticalf("error parsing port in string '%v' ; err: %v", ipPort, err)
