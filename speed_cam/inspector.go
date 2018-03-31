@@ -110,7 +110,11 @@ func (inspector *Inspector) Stop() {
 func (inspector *Inspector) StartInspection() {
 
 	startTime := time.Now()
-	MyLogger.Debug("Start inspection!\n")
+	MyLogger.Info("Start inspection!")
+	if inspector.graph.size == 0 {
+		MyLogger.Warning("Network graph is empty (as far as I know). Inspection aborted.")
+		return
+	}
 
 	selector := Create(inspector.config)
 	selectSpeedCams := selector.SelectSpeedCams(inspector.graph)
@@ -144,7 +148,7 @@ func (inspector *Inspector) StartInspection() {
 		serializeResult := SerializableResult(inspector, inspectionResults, startTime, inspectionDuration)
 		serializeResult.writeJsonResult(inspector.config.ResultDir)
 	}
-	MyLogger.Debugf("Inspection finished!\n")
+	MyLogger.Info("Inspection finished!")
 }
 
 func presentResults(results []map[addr.ISD_AS][]SpeedCamResult) {
