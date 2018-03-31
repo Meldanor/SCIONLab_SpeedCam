@@ -33,10 +33,10 @@ limitations under the License.
         </div>
     </div>
     <div class="row border border-dark">
-        <div class="col-1 border border-dark">
-            <svg id="legend-svg"></svg>
+        <div class="col-2 border border-dark">
+            <svg id="legend-svg" height="100%"></svg>
         </div>
-        <div id="graph-svg-div" class="col-9 border border-dark">
+        <div id="graph-svg-div" class="col-8 border border-dark">
             <svg id="graph-svg" style="width:100%;height:800px;"></svg>
         </div>
         <div class="col-2 border border-dark">
@@ -101,6 +101,8 @@ limitations under the License.
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.5/d3-legend.min.js"></script>
+<!-- Library to format byte strings -->
+<script src="https://cdn.filesizejs.com/filesize.min.js"></script>
 
 <style>
     .link line {
@@ -139,13 +141,13 @@ limitations under the License.
         data = d3.select(this).data()[0];
         d3.select("#link-data-source").text(data.source.Id);
         d3.select("#link-data-target").text(data.target.Id);
-        d3.select("#link-data-avg-bytes").text(bytesToString(data.AvgBytes) + "/s");
+        d3.select("#link-data-avg-bytes").text(filesize(data.AvgBytes, {base: 10}) + "/s");
     }
 
     function onNodeHover() {
         data = d3.select(this).data()[0];
         d3.select("#node-data-isd-as").text(data.Id);
-        d3.select("#node-data-avg-bytes").text(bytesToString(data.AvgBytes) + "/s");
+        d3.select("#node-data-avg-bytes").text(filesize(data.AvgBytes, {base: 10}) + "/s");
         d3.select("#node-data-speed-cam").text(data.WasSpeedCam);
 
         d3.select("#node-data-candidate-score").text(data.CandidateScore);
@@ -164,10 +166,11 @@ limitations under the License.
         }
     }
 
+    var legendMax = Math.pow(10, 10);
     // Domain: 1Byte/s <-> 1GByte/s
-    var logScale = d3.scaleLog().domain([1, 1000 * 1000 * 1000]);
+    var logScale = d3.scaleLog().domain([1, legendMax]);
     const colorScale = d3.scaleSequential(function (d) {
-        return d3.interpolatePuOr(logScale(d));
+        return d3.interpolateInferno(logScale(d));
     });
 
     function createLegend() {
@@ -178,9 +181,18 @@ limitations under the License.
                 .attr("class", "legendLog")
                 .attr("transform", "translate(20,20)");
 
+        var cells = [];
+        for (var i = 1; i <= legendMax; i = i * 10) {
+            cells.push(i);
+        }
+
+        var labelsFunction = function (value) {
+            return filesize(cells[value.i], {base: 10}) + "/s";
+        };
+
         var logLegend = d3.legendColor()
-                .cells([1, 1000, 1000 * 1000, 1000 * 1000 * 1000])
-                .labels(["B/s", "KB/s", "MB/s", "GB/s"])
+                .cells(cells)
+                .labels(labelsFunction)
                 .title("Link bandwidth")
                 .scale(colorScale);
 
@@ -301,7 +313,7 @@ limitations under the License.
 
         zoom_handler(svg);
 
-        for (var i = 0; i < 100; ++i) {
+        for (var i = 0; i < 500; ++i) {
             simulation.tick();
         }
 
