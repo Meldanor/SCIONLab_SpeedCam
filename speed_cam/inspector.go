@@ -128,7 +128,12 @@ func (inspector *Inspector) StartInspection() {
 	inspectionDuration := 30 * time.Second
 	for _, selectedSpeedCam := range selectSpeedCams {
 		MyLogger.Debugf("Initiate speed cam on '%v'\n", selectedSpeedCam.IsdAs)
-		info := clientInfoGrouped[selectedSpeedCam.IsdAs]
+		info, exists := clientInfoGrouped[selectedSpeedCam.IsdAs]
+		if !exists {
+			MyLogger.Warningf("No prometheus info found for selected speed cam '%v'! This AS is skipped!",
+				selectedSpeedCam.IsdAs)
+			continue
+		}
 		speedCam := CreateSpeedCam(selectedSpeedCam.IsdAs, inspectionDuration)
 		MyLogger.Debugf("Start speed cam on '%v' for 30 seconds\n", selectedSpeedCam.IsdAs)
 		go func(cam *SpeedCam, c chan map[addr.ISD_AS][]SpeedCamResult) {
