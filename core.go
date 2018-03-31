@@ -16,65 +16,52 @@
 package main
 
 import (
-	"fmt"
-	"github.com/Meldanor/SCIONLab_SpeedCam/speed_cam"
-	"github.com/c2h5oh/datasize"
-	"github.com/scionproto/scion/go/lib/addr"
-	"time"
+	"flag"
+	sc "github.com/Meldanor/SCIONLab_SpeedCam/speed_cam"
+)
+
+var (
+	defaultConfig = sc.Default()
+
+	psRequestFetchUrlFlag    = flag.String("psUrl", "", "Url to fetch path server requests from")
+	borderRouterFetchUrlFlag = flag.String("brUrl", "", "Url to fetch information about border router")
+
+	episodesFlag     = flag.Int("cEpisodes", defaultConfig.Episodes, "The amount of past episodes to save")
+	wDegreeFlag      = flag.Float64("cWDegree", defaultConfig.WeightDegree, "The weight for the degree")
+	wCapacityFlag    = flag.Float64("cWCapacity", defaultConfig.WeightCapacity, "The weight for the capacity")
+	wSuccessFlag     = flag.Float64("cWSuccess", defaultConfig.WeightSuccess, "The weight for the success")
+	wActivityFlag    = flag.Float64("cWActivity", defaultConfig.WeightActivity, "The weight for the activity")
+	speedCamDiffFlag = flag.Int("cSpeedCamDiff", defaultConfig.SpeedCamDiff, "Additional or fewer speed cams per episode")
+	verboseFlag      = flag.Bool("verbose", defaultConfig.Verbose, "Additional output")
+	resultDirFlag    = flag.String("resultDir", defaultConfig.ResultDir, "Write inspection results to that dir")
 )
 
 func main() {
 
-	// Create your own config
-	config := speed_cam.Default()
-	// Amount of past episodes to save
-	config.Episodes = 6
-	config.WeightDegree = 1.0
-	config.WeightCapacity = 1.0
-	config.WeightSuccess = 1.0
-	config.WeightActivity = 1.0
-	// Additional or fewer speedCams in  a selection
-	config.SpeedCamDiff = 0
+	flag.Parse()
 
-	graph := speed_cam.CreateEmpty(config)
-
-	// Create ASes and add them to the graph
-	as17 := AddIsdAs("1-7", graph)
-	as18 := AddIsdAs("1-8", graph)
-	as19 := AddIsdAs("1-9", graph)
-
-	// Connect ASes
-	graph.ConnectIsdAses(as17, as18)
-	graph.ConnectIsdAses(as17, as19)
-
-	// Add artificial bandwidth (Which was recorded in the path)
-	AddBandwidth(graph, &as17, []datasize.ByteSize{2 * datasize.GB, 3 * datasize.GB})
-	AddBandwidth(graph, &as18, []datasize.ByteSize{4 * datasize.GB, 10 * datasize.GB})
-
-	selector := speed_cam.Create(config)
-	selectedSpeedCams := selector.SelectSpeedCams(graph)
-
-	for _, v := range selectedSpeedCams {
-		fmt.Printf("Selected SpeedCam: %v\n", v.IsdAs)
+	if len(*psRequestFetchUrlFlag) == 0 {
+		flag.Usage()
+		sc.MyLogger.Criticalf("missing '-psUrl' parameter\n")
+		return
 	}
+	if len(*borderRouterFetchUrlFlag) == 0 {
+		flag.Usage()
+		sc.MyLogger.Criticalf("missing '-brUrl' parameter\n")
+		return
+	}
+	config := getConfig()
+	sc.RunProgram(config, *psRequestFetchUrlFlag, *borderRouterFetchUrlFlag)
 }
 
-func AddIsdAs(isdAsString string, graph *speed_cam.NetworkGraph) addr.ISD_AS {
-	as, _ := addr.IAFromString(isdAsString)
-
-	isdAs := *as
-	graph.AddIsdAs(isdAs)
-
-	return isdAs
-}
-
-func AddBandwidth(graph *speed_cam.NetworkGraph, as *addr.ISD_AS, bandwidths []datasize.ByteSize) {
-
-	// Arbitrary values
-	date := time.Date(2018, 02, 23, 10, 0, 0, 0, time.Local)
-	duration := time.Second * 30
-
-	for _, v := range bandwidths {
-		graph.AddBandwidth(as, date, duration, v)
-	}
+func getConfig() *sc.SpeedCamConfig {
+	return &sc.SpeedCamConfig{
+		Episodes:       *episodesFlag,
+		WeightDegree:   *wDegreeFlag,
+		WeightCapacity: *wCapacityFlag,
+		WeightSuccess:  *wSuccessFlag,
+		WeightActivity: *wActivityFlag,
+		SpeedCamDiff:   *speedCamDiffFlag,
+		Verbose:        *verboseFlag,
+		ResultDir:      *resultDirFlag}
 }
