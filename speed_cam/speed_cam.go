@@ -40,41 +40,44 @@ func (cam *SpeedCam) Measure(measurementPoints []PrometheusClientInfo, pollInter
 
 	cam.start = time.Now()
 
-	resultChannel := make(chan []SpeedCamResult, len(measurementPoints))
+	resultChannel := make(chan Result, len(measurementPoints))
 	defer close(resultChannel)
 
 	for _, v := range measurementPoints {
 		go cam.measureData(v, pollInterval, resultChannel)
 	}
 
-	time.Sleep(cam.duration + 5*time.Second)
 	resultMap := make(map[addr.ISD_AS][]SpeedCamResult)
 	for i := 0; i < len(measurementPoints); i++ {
-		resultsPerBr := <-resultChannel
+		result := <-resultChannel
+		if result.err != nil {
+			MyLogger.Criticalf("error: %v\n", result.err)
+			continue
+		}
+		resultsPerBr := result.results
 		brId := resultsPerBr[0].Neighbor
 		resultMap[brId] = resultsPerBr
 	}
 	return resultMap
 }
 
-func (cam *SpeedCam) measureData(measurementPoint PrometheusClientInfo, pollInterval time.Duration, resultChannel chan []SpeedCamResult) error {
+func (cam *SpeedCam) measureData(measurementPoint PrometheusClientInfo, pollInterval time.Duration, c chan Result) {
 
-	results := collectData(cam, measurementPoint, pollInterval)
-	results, err := differentiateResults(results)
+	results, err := collectData(cam, measurementPoint, pollInterval)
 	if err != nil {
-		MyLogger.Criticalf("error: %v", err)
-		return err
+		c <- Result{results: results, err: err}
+		return
 	}
-
-	resultChannel <- results
-	return nil
+	result := differentiateResults(results)
+	c <- result
 }
 
-func differentiateResults(results []SpeedCamResult) ([]SpeedCamResult, error) {
+func differentiateResults(results []SpeedCamResult) Result {
 
 	size := len(results)
 	if size <= 1 {
-		return results, errors.New(fmt.Sprintf("Too few elements to differentiate (needs 2 or more): %v", size))
+		err := errors.New(fmt.Sprintf("Too few elements to differentiate (needs 2 or more): %v", size))
+		return Result{results: results, err: err}
 	}
 
 	diffResults := make([]SpeedCamResult, size-1)
@@ -82,8 +85,7 @@ func differentiateResults(results []SpeedCamResult) ([]SpeedCamResult, error) {
 	for i := 0; i < size-1; i++ {
 		diffResults[i] = differentiateResult(results[i], results[i+1])
 	}
-
-	return diffResults, nil
+	return Result{results: diffResults, err: nil}
 }
 
 func differentiateResult(resultStart SpeedCamResult, resultEnd SpeedCamResult) SpeedCamResult {
@@ -114,18 +116,19 @@ func differentiateResult(resultStart SpeedCamResult, resultEnd SpeedCamResult) S
 	return result
 }
 
-func collectData(cam *SpeedCam, measurementPoint PrometheusClientInfo, pollInterval time.Duration) []SpeedCamResult {
+func collectData(cam *SpeedCam, measurementPoint PrometheusClientInfo, pollInterval time.Duration) ([]SpeedCamResult, error) {
 	end := cam.start.Add(cam.duration)
 	results := make([]SpeedCamResult, 0)
+	var err error = nil
 	for {
 		url := measurementPoint.URL()
 
 		result := SpeedCamResult{Timestamp: time.Now(), BandwidthIn: 0, BandwidthOut: 0, Source: cam.isdAs, Neighbor: measurementPoint.TargetIsdAs}
-		err := cam.pollData(url, &result)
+		pollErr := cam.pollData(url, &result)
 
-		if err != nil {
-			MyLogger.Criticalf("error polling data. speed cam: %v, url: %v\n", cam.isdAs, url)
-			continue
+		if pollErr != nil {
+			err = errors.New(fmt.Sprintf("error polling data. speed cam: %v, url: %v\n", cam.isdAs, url))
+			break
 		}
 
 		results = append(results, result)
@@ -136,7 +139,7 @@ func collectData(cam *SpeedCam, measurementPoint PrometheusClientInfo, pollInter
 		time.Sleep(pollInterval)
 	}
 
-	return results
+	return results, err
 }
 
 func (cam *SpeedCam) pollData(prometheusUrl string, result *SpeedCamResult) error {
@@ -174,4 +177,9 @@ type SpeedCamResult struct {
 	BandwidthOut datasize.ByteSize
 	Source       addr.ISD_AS
 	Neighbor     addr.ISD_AS
+}
+
+type Result struct {
+	results []SpeedCamResult
+	err     error
 }
