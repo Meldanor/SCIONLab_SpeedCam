@@ -199,7 +199,25 @@ func (inspector *Inspector) aggregateResults(results []map[addr.ISD_AS][]SpeedCa
 	}
 
 	for key, v := range bandwidthPerNode {
-		info := inspector.graph.nodes[key].info
+		node, exists := inspector.graph.nodes[key]
+		if !exists {
+			MyLogger.Warningf("Activity for node '%v' registered, but it was not in the graph. Node added!", key)
+			inspector.graph.AddIsdAs(key)
+
+			for _, m := range results {
+				for _, v := range m {
+					for _, result := range v {
+						if key == result.Source {
+							inspector.graph.ConnectIsdAses(key, result.Neighbor)
+						} else if key == result.Neighbor {
+							inspector.graph.ConnectIsdAses(key, result.Source)
+						}
+					}
+				}
+			}
+			node = inspector.graph.nodes[key]
+		}
+		info := node.info
 		MyLogger.Debugf("Add activity to node '%v', start time: %v, duration: %v, average bytes/s: %v",
 			key, start, inspectionDuration, v.HR())
 		info.AddActivity(start, inspectionDuration, v)

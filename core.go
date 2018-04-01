@@ -51,6 +51,7 @@ func main() {
 		return
 	}
 	config := getConfig()
+	sc.MyLogger.Debugf("Config: %v\n", config)
 	sc.RunProgram(config, *psRequestFetchUrlFlag, *borderRouterFetchUrlFlag)
 }
 
