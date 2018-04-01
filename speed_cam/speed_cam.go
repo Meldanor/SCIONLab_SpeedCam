@@ -164,8 +164,8 @@ func (cam *SpeedCam) pollData(prometheusUrl string, result *SpeedCamResult) erro
 func parseValue(line string) uint64 {
 	i := strings.LastIndex(line, " ") + 1
 	numberString := line[i:]
-	v, _ := strconv.ParseUint(numberString, 10, 64)
-	return v
+	v, _ := strconv.ParseFloat(numberString, 64)
+	return uint64(v)
 }
 
 type SpeedCamResult struct {
