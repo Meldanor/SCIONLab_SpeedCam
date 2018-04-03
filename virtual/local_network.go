@@ -47,6 +47,8 @@ var (
 	speedCamDiffFlag = flag.Int("cSpeedCamDiff", defaultConfig.SpeedCamDiff, "Additional or fewer speed cams per episode")
 	verboseFlag      = flag.Bool("verbose", defaultConfig.Verbose, "Additional output")
 	resultDirFlag    = flag.String("resultDir", defaultConfig.ResultDir, "Write inspection results to that dir")
+	scaleTypeFlag    = flag.String("scaleType", defaultConfig.ScaleType, "How many SpeedCams should be selected? Supported: const, log and linear")
+	scaleParamFlag   = flag.Float64("scaleParam", defaultConfig.ScaleParam, "The parameter for the scale func. Base for log, factor for linear and the const for const")
 
 	// mock variables - the external server should handle them in a real application
 	brInfos      []sc.PrometheusClientInfo
@@ -117,7 +119,9 @@ func getConfig() *sc.SpeedCamConfig {
 		WeightActivity: *wActivityFlag,
 		SpeedCamDiff:   *speedCamDiffFlag,
 		Verbose:        *verboseFlag,
-		ResultDir:      *resultDirFlag}
+		ResultDir:      *resultDirFlag,
+		ScaleType:      *scaleTypeFlag,
+		ScaleParam:     *scaleParamFlag}
 }
 
 // Mock a simple HTTP server to serving the data

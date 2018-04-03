@@ -49,7 +49,7 @@ func (selector *SpeedCamSelector) SelectSpeedCams(graph *NetworkGraph) []network
 }
 
 func (selector *SpeedCamSelector) calculateScore(node networkNode) *speedCamCandidate {
-	var score float64 = 0.0
+	var score = 0.0
 	info := node.info
 	score += float64(info.degree) * selector.config.WeightDegree
 	score += float64(info.capacity) * selector.config.WeightCapacity
@@ -76,8 +76,8 @@ func (selector *SpeedCamSelector) normalizeScores(candidates map[addr.ISD_AS]*sp
 
 func (selector *SpeedCamSelector) selectCams(candidates map[addr.ISD_AS]*speedCamCandidate) []networkNode {
 
-	// Select m + log(n) nodes; m=additional amount (can be negative); n=amount of nodes
-	count := selector.config.SpeedCamDiff + int(math.Ceil(math.Log10(float64(len(candidates)))))
+	count := selector.config.Scale(len(candidates)) + selector.config.SpeedCamDiff
+	MyLogger.Debugf("Candidates: %v, SpeedCam count: %v", len(candidates), count)
 	var i = 0
 
 	selectedCams := make(map[addr.ISD_AS]*speedCamCandidate)

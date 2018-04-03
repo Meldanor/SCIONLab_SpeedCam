@@ -17,6 +17,7 @@ package speed_cam
 
 import (
 	"fmt"
+	"math"
 )
 
 // Configuration for the SpeedCam algorithm
@@ -37,6 +38,11 @@ type SpeedCamConfig struct {
 	Verbose bool
 	// If it is an non empty string, the inspector will write the results to this dir as JSON files
 	ResultDir string
+	// Currently supported are 'const', 'linear' and 'log'
+	ScaleType string
+	// The factor for the scale. For 'log' this is the base for the logarithmic, for 'linear' it is the factor and
+	// for 'const' it is the constant itself
+	ScaleParam float64
 }
 
 // Default values for the algorithm.
@@ -50,12 +56,37 @@ func Default() *SpeedCamConfig {
 	config.SpeedCamDiff = 0
 	config.Verbose = true
 	config.ResultDir = ""
-
+	config.ScaleType = "linear"
+	config.ScaleParam = 0.2
 	return config
 }
 
 func (config *SpeedCamConfig) String() string {
-	return fmt.Sprintf("{Episodes: %v, wDegree: %v, wCapacity: %v, wSuccess: %v, wActivity: %v, SpeedCamDiff: %v, Verbose: %v, ResultDir: %v}",
+	return fmt.Sprintf("{Episodes: %v, wDegree: %v, wCapacity: %v, wSuccess: %v, wActivity: %v, "+
+		"SpeedCamDiff: %v, Verbose: %v, ResultDir: %v, ScaleType: %v, ScaleParam: %3.3f}",
 		config.Episodes, config.WeightDegree, config.WeightCapacity, config.WeightSuccess, config.WeightActivity,
-		config.SpeedCamDiff, config.Verbose, config.ResultDir)
+		config.SpeedCamDiff, config.Verbose, config.ResultDir, config.ScaleType, config.ScaleParam)
+}
+
+func (config *SpeedCamConfig) Scale(n int) int {
+	if config.ScaleParam < 0 {
+		MyLogger.Panicf("Param for scale %3.3f cannot be negative!", config.ScaleParam)
+	}
+	switch config.ScaleType {
+	case "const":
+		return int(config.ScaleParam)
+	case "linear":
+		size := float64(n) * config.ScaleParam
+		return int(size)
+	case "log":
+		if config.ScaleParam == 1 {
+			MyLogger.Panicf("Invalid base of 1 for log scale!", config.ScaleParam)
+		}
+		size := float64(n)
+		result := math.Ceil(math.Log(size) / math.Log(config.ScaleParam))
+		return int(result)
+	default:
+		MyLogger.Panicf("Unsupported scale type '%v'", config.ScaleType)
+		return -1
+	}
 }
