@@ -34,8 +34,13 @@ var (
 	speedCamDiffFlag = flag.Int("cSpeedCamDiff", defaultConfig.SpeedCamDiff, "Additional or fewer speed cams per episode")
 	verboseFlag      = flag.Bool("verbose", defaultConfig.Verbose, "Additional output")
 	resultDirFlag    = flag.String("resultDir", defaultConfig.ResultDir, "Write inspection results to that dir")
-	scaleTypeFlag    = flag.String("scaleType", defaultConfig.ScaleType, "How many SpeedCams should be selected? Supported: const, log and linear")
-	scaleParamFlag   = flag.Float64("scaleParam", defaultConfig.ScaleParam, "The parameter for the scale func. Base for log, factor for linear and the const for const")
+
+	scaleTypeFlag  = flag.String("scaleType", defaultConfig.ScaleType, "How many SpeedCams should be selected? Supported: const, log and linear")
+	scaleParamFlag = flag.Float64("scaleParam", defaultConfig.ScaleParam, "The parameter for the scale func. Base for log, factor for linear and the const for const")
+
+	intervalStratFlag = flag.String("intervalStrat", defaultConfig.IntervalStrategy, "Strategy for waiting. Supported: fixed, random and experience")
+	intervalMinFlag   = flag.Uint("intervalMin", defaultConfig.IntervalWaitMin, "Seconds to wait at minimum till next inspection.")
+	intervalMaxFlag   = flag.Uint("intervalMax", defaultConfig.IntervalWaitMax, "Seconds to wait at maximum till next inspection.")
 )
 
 func main() {
@@ -59,14 +64,18 @@ func main() {
 
 func getConfig() *sc.SpeedCamConfig {
 	return &sc.SpeedCamConfig{
-		Episodes:       *episodesFlag,
-		WeightDegree:   *wDegreeFlag,
-		WeightCapacity: *wCapacityFlag,
-		WeightSuccess:  *wSuccessFlag,
-		WeightActivity: *wActivityFlag,
-		SpeedCamDiff:   *speedCamDiffFlag,
-		Verbose:        *verboseFlag,
-		ResultDir:      *resultDirFlag,
-		ScaleType:      *scaleTypeFlag,
-		ScaleParam:     *scaleParamFlag}
+		Episodes:         *episodesFlag,
+		WeightDegree:     *wDegreeFlag,
+		WeightCapacity:   *wCapacityFlag,
+		WeightSuccess:    *wSuccessFlag,
+		WeightActivity:   *wActivityFlag,
+		SpeedCamDiff:     *speedCamDiffFlag,
+		Verbose:          *verboseFlag,
+		ResultDir:        *resultDirFlag,
+		ScaleType:        *scaleTypeFlag,
+		ScaleParam:       *scaleParamFlag,
+		IntervalStrategy: *intervalStratFlag,
+		IntervalWaitMin:  *intervalMinFlag,
+		IntervalWaitMax:  *intervalMaxFlag,
+	}
 }

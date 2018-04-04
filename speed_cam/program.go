@@ -32,9 +32,11 @@ func RunProgram(config *SpeedCamConfig, requestFetchUrl string, borderRouterFetc
 	time.Sleep(2 * time.Second)
 
 	MyLogger.Debug("Starting inspection loop...")
-	for ; ProgramRunning; {
+	for ProgramRunning {
 		inspector.StartInspection()
-		time.Sleep(10 * time.Second)
+		sleepTime := getWaitTime(inspector)
+		MyLogger.Debugf("Sleep for '%v' till next inspection", sleepTime)
+		time.Sleep(sleepTime)
 	}
 	MyLogger.Debug("Finished loop!")
 }

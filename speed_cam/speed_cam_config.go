@@ -43,6 +43,12 @@ type SpeedCamConfig struct {
 	// The factor for the scale. For 'log' this is the base for the logarithmic, for 'linear' it is the factor and
 	// for 'const' it is the constant itself
 	ScaleParam float64
+	// The strategy to wait till next inspection. Currently supported are 'fixed','random','experience'
+	IntervalStrategy string
+	// Seconds to wait at minimum till next inspection.
+	IntervalWaitMin uint
+	// Seconds to wait at maximum till next inspection.
+	IntervalWaitMax uint
 }
 
 // Default values for the algorithm.
@@ -58,14 +64,19 @@ func Default() *SpeedCamConfig {
 	config.ResultDir = ""
 	config.ScaleType = "linear"
 	config.ScaleParam = 0.2
+	config.IntervalStrategy = "fixed"
+	config.IntervalWaitMin = 10   // 10 seconds
+	config.IntervalWaitMax = 3600 // 1 hour
 	return config
 }
 
 func (config *SpeedCamConfig) String() string {
 	return fmt.Sprintf("{Episodes: %v, wDegree: %v, wCapacity: %v, wSuccess: %v, wActivity: %v, "+
-		"SpeedCamDiff: %v, Verbose: %v, ResultDir: %v, ScaleType: %v, ScaleParam: %3.3f}",
+		"SpeedCamDiff: %v, Verbose: %v, ResultDir: %v, ScaleType: %v, ScaleParam: %3.3f, "+
+		"IntervalStrategy: %v, Interval: [%v - %v]}",
 		config.Episodes, config.WeightDegree, config.WeightCapacity, config.WeightSuccess, config.WeightActivity,
-		config.SpeedCamDiff, config.Verbose, config.ResultDir, config.ScaleType, config.ScaleParam)
+		config.SpeedCamDiff, config.Verbose, config.ResultDir, config.ScaleType, config.ScaleParam,
+		config.IntervalStrategy, config.IntervalWaitMin, config.IntervalWaitMax)
 }
 
 func (config *SpeedCamConfig) Scale(n int) int {
