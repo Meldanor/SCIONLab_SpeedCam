@@ -107,10 +107,11 @@ func differentiateResult(resultStart SpeedCamResult, resultEnd SpeedCamResult) S
 		input = resultEnd.BandwidthIn - resultStart.BandwidthIn
 	}
 
+	duration := resultEnd.Timestamp.Sub(resultStart.Timestamp)
 	unixTime := (resultEnd.Timestamp.Unix() + resultStart.Timestamp.Unix()) / 2
 	timeStamp := time.Unix(unixTime, 0)
-	result.BandwidthOut = output
-	result.BandwidthIn = input
+	result.BandwidthOut = output / datasize.ByteSize(duration.Seconds())
+	result.BandwidthIn = input / datasize.ByteSize(duration.Seconds())
 	result.Timestamp = timeStamp
 
 	return result
