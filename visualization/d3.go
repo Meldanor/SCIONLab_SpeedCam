@@ -26,6 +26,7 @@ import (
 	"log"
 	"net/http"
 	"path"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -57,15 +58,12 @@ func main() {
 	}
 	fmt.Printf("Result dir: '%v', port: '%v'\n", *resultDir, *port)
 
-	results, err := loadData(*resultDir)
+	visData, err := loadData(*resultDir)
 
 	if err != nil {
 		fmt.Printf("error loading result files. err: %v\n", err)
 	}
 
-	fmt.Println("Calculcate visualization data...")
-
-	visData := transformResult(results)
 	fmt.Printf("Data size: %v\n", len(visData))
 
 	// Pre marshall the data to JSON to save time
@@ -109,47 +107,65 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func loadData(dir string) ([]speed_cam.InspectionResult, error) {
+func loadData(dir string) ([]VisData, error) {
 
-	var results []speed_cam.InspectionResult
+	var results []VisData
 
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
 		return results, err
 	}
 
+	fileCount := len(files)
+	fileChannel := make(chan string, fileCount)
+	resultsChannel := make(chan VisData, fileCount)
+
+	fmt.Printf("Create %v worker threads to parse %v files\n", runtime.NumCPU(), fileCount)
+	// Create worker as based on example from https://gobyexample.com/worker-pools
+	for i := 0; i < runtime.NumCPU(); i++ {
+		go handleData(fileChannel, resultsChannel)
+	}
+
 	for _, file := range files {
 		fileName := path.Join(dir, file.Name())
-		readBytes, err := ioutil.ReadFile(fileName)
+		fileChannel <- fileName
+	}
+	close(fileChannel)
 
-		if err != nil {
-			return results, err
-		}
-
-		result := *new(speed_cam.InspectionResult)
-		err = json.Unmarshal(readBytes, &result)
-		if err != nil {
-			return results, err
-		}
-		results = append(results, result)
+	for i := 0; i < fileCount; i++ {
+		results = append(results, <-resultsChannel)
 	}
 
 	return results, nil
 }
 
-func transformResult(results []speed_cam.InspectionResult) []VisData {
+func handleData(files <-chan string, results chan<- VisData) {
+	for fileName := range files {
+		readBytes, err := ioutil.ReadFile(fileName)
 
-	var visDataSlice []VisData
+		if err != nil {
+			fmt.Printf("error with file '%v'! %v\n", fileName, err)
+			continue
+		}
 
-	for _, r := range results {
+		result := *new(speed_cam.InspectionResult)
+		err = json.Unmarshal(readBytes, &result)
+		if err != nil {
+			fmt.Printf("error with file '%v'! %v\n", fileName, err)
+			continue
+		}
 
-		visData := VisData{Duration: r.Duration, Timestamp: r.Start}
-		visData.LinkData = createLinkData(r)
-		visData.NodeData = createNodeData(r)
-		visDataSlice = append(visDataSlice, visData)
+		visData := transformResult(result)
+		results <- visData
 	}
+}
 
-	return visDataSlice
+func transformResult(result speed_cam.InspectionResult) VisData {
+
+	visData := VisData{Duration: result.Duration, Timestamp: result.Start}
+	visData.LinkData = createLinkData(result)
+	visData.NodeData = createNodeData(result)
+	return visData
 }
 
 func createNodeData(result speed_cam.InspectionResult) []NodeData {
