@@ -117,9 +117,12 @@ func (inspector *Inspector) StartInspection() {
 	}
 
 	selector := Create(inspector.config)
-	selectSpeedCams := selector.SelectSpeedCams(inspector.graph)
 	clientInfos := inspector.brInfoFetcher.Info
 	clientInfoGrouped := groupBySource(clientInfos)
+	usableSpeedCams := filterNodesWithBrInfos(clientInfoGrouped, inspector.graph.nodes)
+
+	MyLogger.Debugf("Existing nodes in the graph: %v, nodes with BR information: %v", inspector.graph.size, len(usableSpeedCams))
+	selectSpeedCams := selector.SelectUsableSpeedCams(usableSpeedCams)
 
 	size := len(selectSpeedCams)
 	resultChannel := make(chan map[addr.ISD_AS][]SpeedCamResult, size)
@@ -128,17 +131,11 @@ func (inspector *Inspector) StartInspection() {
 	inspectionDuration := 30 * time.Second
 	for _, selectedSpeedCam := range selectSpeedCams {
 		MyLogger.Debugf("Initiate speed cam on '%v'\n", selectedSpeedCam.IsdAs)
-		info, exists := clientInfoGrouped[selectedSpeedCam.IsdAs]
-		if !exists {
-			MyLogger.Warningf("No prometheus info found for selected speed cam '%v'! This AS is skipped!",
-				selectedSpeedCam.IsdAs)
-			size--
-			continue
-		}
+		info := clientInfoGrouped[selectedSpeedCam.IsdAs]
 		speedCam := CreateSpeedCam(selectedSpeedCam.IsdAs, inspectionDuration)
-		MyLogger.Debugf("Start speed cam on '%v' for 30 seconds\n", selectedSpeedCam.IsdAs)
-		go func(cam *SpeedCam, c chan map[addr.ISD_AS][]SpeedCamResult) {
+		MyLogger.Debugf("Start speed cam on '%v' for %v \n", selectedSpeedCam.IsdAs, inspectionDuration)
 
+		go func(cam *SpeedCam, c chan map[addr.ISD_AS][]SpeedCamResult) {
 			c <- cam.Measure(info, 5*time.Second)
 		}(speedCam, resultChannel)
 	}
@@ -155,6 +152,19 @@ func (inspector *Inspector) StartInspection() {
 		serializeResult.writeJsonResult(inspector.config.ResultDir)
 	}
 	MyLogger.Info("Inspection finished!")
+}
+
+func filterNodesWithBrInfos(clientInfo map[addr.ISD_AS][]PrometheusClientInfo, nodes map[addr.ISD_AS]networkNode) map[addr.ISD_AS]networkNode {
+	filteredMap := make(map[addr.ISD_AS]networkNode)
+
+	for k, v := range nodes {
+		_, exists := clientInfo[k]
+		if exists {
+			filteredMap[k] = v
+		}
+	}
+
+	return filteredMap
 }
 
 func presentResults(results []map[addr.ISD_AS][]SpeedCamResult) {

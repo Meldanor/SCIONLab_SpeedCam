@@ -37,9 +37,9 @@ type speedCamCandidate struct {
 	node  networkNode
 }
 
-func (selector *SpeedCamSelector) SelectSpeedCams(graph *NetworkGraph) []networkNode {
+func (selector *SpeedCamSelector) SelectUsableSpeedCams(nodes map[addr.ISD_AS]networkNode) []networkNode {
 	candidates := make(map[addr.ISD_AS]*speedCamCandidate)
-	for k, v := range graph.nodes {
+	for k, v := range nodes {
 		candidates[k] = selector.calculateScore(v)
 	}
 
@@ -101,11 +101,10 @@ func (selector *SpeedCamSelector) selectCams(candidates map[addr.ISD_AS]*speedCa
 
 	// Are not enough speedCams selected -> select highest chance
 	if i != count {
-
-		notSelectedCams := make([]speedCamCandidate, count-i)
+		var notSelectedCams []speedCamCandidate
 		for k, v := range candidates {
 			_, ok := selectedCams[k]
-			if ok {
+			if !ok {
 				notSelectedCams = append(notSelectedCams, *v)
 			}
 		}
@@ -121,7 +120,7 @@ func (selector *SpeedCamSelector) selectCams(candidates map[addr.ISD_AS]*speedCa
 		}
 	}
 
-	result := make([]networkNode, 0)
+	var result []networkNode
 	for _, v := range selectedCams {
 		result = append(result, v.node)
 	}
