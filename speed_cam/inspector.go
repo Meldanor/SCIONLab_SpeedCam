@@ -30,8 +30,6 @@ type Inspector struct {
 	config        *SpeedCamConfig
 	fetcher       PathRequestFetcher
 	brInfoFetcher PrometheusClientFetcher
-
-	active bool
 }
 
 // Creates an inspector with an empty to be explored network graph.
@@ -67,11 +65,11 @@ func (inspector *Inspector) HandlePathRequest(pathRequest string) error {
 
 	var isdAses []addr.ISD_AS
 	for _, e := range isdPairs {
-		isd_as, err := addr.IAFromString(e)
+		isdAs, err := addr.IAFromString(e)
 		if err != nil {
 			return errors.New(fmt.Sprintf("Path request has invalid format or no pairs. Request:%s", pathRequest))
 		}
-		isdAses = append(isdAses, *isd_as)
+		isdAses = append(isdAses, *isdAs)
 	}
 
 	// Add all ASes to the graph
@@ -89,22 +87,13 @@ func (inspector *Inspector) HandlePathRequest(pathRequest string) error {
 
 func (inspector *Inspector) Start(fetcher PathRequestFetcher, clientFetcher PrometheusClientFetcher) error {
 
-	inspector.active = true
 	inspector.fetcher = fetcher
 	inspector.brInfoFetcher = clientFetcher
 
 	go inspector.fetchPathRequests()
 	go inspector.fetchBrInfo()
 
-	for inspector.active {
-		time.Sleep(1 * time.Millisecond)
-	}
-
 	return nil
-}
-
-func (inspector *Inspector) Stop() {
-	inspector.active = false
 }
 
 func (inspector *Inspector) StartInspection() {
@@ -248,7 +237,7 @@ func groupBySource(clientInfos []PrometheusClientInfo) map[addr.ISD_AS][]Prometh
 
 func (inspector *Inspector) fetchPathRequests() error {
 
-	for inspector.active {
+	for {
 
 		pathRequests, err := inspector.fetcher.FetchPathRequests()
 
@@ -268,7 +257,7 @@ func (inspector *Inspector) fetchPathRequests() error {
 
 func (inspector *Inspector) fetchBrInfo() error {
 
-	for inspector.active {
+	for {
 
 		err := inspector.brInfoFetcher.PollData()
 
