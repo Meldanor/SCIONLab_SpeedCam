@@ -26,6 +26,7 @@ import (
 	"log"
 	"net/http"
 	"path"
+	"path/filepath"
 	"runtime"
 	"strconv"
 	"strings"
@@ -116,7 +117,12 @@ func loadData(dir string) ([]VisData, error) {
 		return results, err
 	}
 
-	fileCount := len(files)
+	fileCount := 0
+	for _, v := range files {
+		if filepath.Ext(v.Name()) == ".json" {
+			fileCount++
+		}
+	}
 	fileChannel := make(chan string, fileCount)
 	resultsChannel := make(chan VisData, fileCount)
 
@@ -127,8 +133,10 @@ func loadData(dir string) ([]VisData, error) {
 	}
 
 	for _, file := range files {
-		fileName := path.Join(dir, file.Name())
-		fileChannel <- fileName
+		if filepath.Ext(file.Name()) == ".json" {
+			fileName := path.Join(dir, file.Name())
+			fileChannel <- fileName
+		}
 	}
 	close(fileChannel)
 
