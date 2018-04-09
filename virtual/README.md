@@ -1,4 +1,4 @@
-# SpeedCam
+# SpeedCam_Virtual
 
 A proof of concept implemenation of the SpeedCam bandwidth usage algorithm for multipath communication in networks 
 especially in SCION. Written in Go 1.9.
@@ -14,21 +14,18 @@ Install the dependencies via govendor (needs to be installed)
 
 ### Run
 
-The `core.go` contains the SpeedCam approach and can be run using a real SCION network.
+The `local_network.go` contains the SpeedCam approach and can be run on a virtual SCION network like in a SCIONLab VM.
 
-`go run core.go -psUrl=[URL] -brUrl=[URL]`
+`go run local_network.go -scionDir=[PATH]`
 
 or
 
-build with `go build core.go` and run with `./core -psUrl=[URL] -brUrl=[URL]`
+build with `go build local_network.go` and run with `./local_network -scionDir=[PATH]`
 
 ### Necessary parameter
 
-- `-psUrl=[URL]`, where `[URL]` points to an HTTP resource providing
-path server requests.  Example: `-psUrl=http://localhost:8080/pathServerRequests`
-
-- `-brUrl=[URL]`, where `[URL]` points to an HTTP resource providing
-border router information. Example: `-brUrl=http://localhost:8080/prometheusClient`
+- `-scionDir=[PATH]`, where `[PATH]` points to a scion dir with its *gen* and *log* folder
+path server requests.  Example: `-scionDir=/home/scion/go/src/scionproto/scion`
 
 You can also run with the parameter `-h` or `--help` to print the help to console.
 
