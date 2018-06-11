@@ -1,0 +1,320 @@
+<!--
+Copyright 2018 ETH Zurich, OvGU Magdeburg
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SC Visualization</title>
+</head>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+      integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/10.0.0/css/bootstrap-slider.min.css">
+
+<body>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col">
+            <h1 class="text-center">SpeedCam live visualization</h1>
+        </div>
+    </div>
+    <div class="row border border-dark">
+        <div class="col-2 border border-dark">
+            <svg id="legend-svg" height="100%"></svg>
+        </div>
+        <div id="graph-svg-div" class="col-8 border border-dark">
+            <svg id="graph-svg" style="width:100%;height:1000px;"></svg>
+        </div>
+        <div class="col-2 border border-dark">
+            <div class="row border border-dark">
+                <div class="col">
+                    <h2>Run data</h2>
+                    <dl class="row">
+                        <dt class="col-sm-4">Time</dt>
+                        <dd class="col-sm-8" id="run-data-time"></dd>
+                        <dt class="col-sm-4">Duration</dt>
+                        <dd class="col-sm-8" id="run-data-duration"></dd>
+                        <dt class="col-sm-4">Nodes</dt>
+                        <dd class="col-sm-8" id="run-data-node-count"></dd>
+                        <dt class="col-sm-4">Links</dt>
+                        <dd class="col-sm-8" id="run-data-link-count"></dd>
+                        <dt class="col-sm-4">Speed cams</dt>
+                        <dd class="col-sm-8" id="run-data-speed-cams"></dd>
+                    </dl>
+                </div>
+            </div>
+            <div class="row border border-dark">
+                <div class="col">
+                    <h2>Node data</h2>
+                    <dl class="row">
+                        <dt class="col-sm-4">ISD-AS</dt>
+                        <dd class="col-sm-8" id="node-data-isd-as"></dd>
+                        <dt class="col-sm-4">Avg bytes/s</dt>
+                        <dd class="col-sm-8" id="node-data-avg-bytes"></dd>
+                        <dt class="col-sm-4">Speed cam?</dt>
+                        <dd class="col-sm-8" id="node-data-speed-cam"></dd>
+                        <dt class="col-sm-4">Score</dt>
+                        <dd class="col-sm-8" id="node-data-candidate-score"></dd>
+                    </dl>
+                </div>
+            </div>
+            <div class="row border border-dark">
+                <div class="col">
+                    <h2>Link data</h2>
+                    <dl class="row">
+                        <dt class="col-sm-4">Source</dt>
+                        <dd class="col-sm-8" id="link-data-source"></dd>
+                        <dt class="col-sm-4">Target</dt>
+                        <dd class="col-sm-8" id="link-data-target"></dd>
+                        <dt class="col-sm-4">Avg bytes/s</dt>
+                        <dd class="col-sm-8" id="link-data-avg-bytes"></dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/10.0.0/bootstrap-slider.min.js"></script>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.5/d3-legend.min.js"></script>
+<!-- Library to format byte strings -->
+<script src="https://cdn.filesizejs.com/filesize.min.js"></script>
+
+<style>
+    .link line {
+        stroke: #999;
+        stroke-opacity: 1;
+    }
+
+    .node circle {
+        stroke-width: 1px;
+    }
+
+    .node text {
+        pointer-events: none;
+        font: 8px sans-serif;
+    }
+</style>
+<script>
+
+    function updateRunDataBox(resultData) {
+        d3.select("#run-data-time").text(resultData.Timestamp);
+        d3.select("#run-data-duration").text((resultData.Duration/1000/1000/1000)+"s");
+        d3.select("#run-data-node-count").text(resultData.NodeData.length);
+        d3.select("#run-data-link-count").text(resultData.LinkData.length);
+
+        var speedCams = [];
+        for (var i = 0; i < resultData.NodeData.length; ++i) {
+            var node = resultData.NodeData[i];
+            if (node.WasSpeedCam) {
+                speedCams.push(node.Id);
+            }
+        }
+        d3.select("#run-data-speed-cams").text(speedCams);
+    }
+
+    function onLinkHover() {
+        data = d3.select(this).data()[0];
+        d3.select("#link-data-source").text(data.source.Id);
+        d3.select("#link-data-target").text(data.target.Id);
+        d3.select("#link-data-avg-bytes").text(filesize(data.AvgBytes, {base: 10}) + "/s");
+    }
+
+    function onNodeHover() {
+        data = d3.select(this).data()[0];
+        d3.select("#node-data-isd-as").text(data.Id);
+        d3.select("#node-data-avg-bytes").text(filesize(data.AvgBytes, {base: 10}) + "/s");
+        d3.select("#node-data-speed-cam").text(data.WasSpeedCam);
+
+        d3.select("#node-data-candidate-score").text(data.CandidateScore);
+    }
+
+    function bytesToString(bytes) {
+        var fmt = d3.format('.0f');
+        if (bytes < 1024) {
+            return fmt(bytes) + 'B';
+        } else if (bytes < 1024 * 1024) {
+            return fmt(bytes / 1024) + 'kB';
+        } else if (bytes < 1024 * 1024 * 1024) {
+            return fmt(bytes / 1024 / 1024) + 'MB';
+        } else {
+            return fmt(bytes / 1024 / 1024 / 1024) + 'GB';
+        }
+    }
+
+    var legendMax = Math.pow(10, 10);
+    // Domain: 1Byte/s <-> 1GByte/s
+    var logScale = d3.scaleLog().domain([1, legendMax]);
+    const colorScale = d3.scaleSequential(function (d) {
+        return d3.interpolateInferno(logScale(d));
+    });
+
+    function createLegend() {
+        // create legend
+        var legendSvg = d3.select("#legend-svg");
+
+        legendSvg.append("g")
+                .attr("class", "legendLog")
+                .attr("transform", "translate(20,20)");
+
+        var cells = [];
+        for (var i = 1; i <= legendMax; i = i * 10) {
+            cells.push(i);
+        }
+
+        var labelsFunction = function (value) {
+            return filesize(cells[value.i], {base: 10}) + "/s";
+        };
+
+        var logLegend = d3.legendColor()
+                .cells(cells)
+                .labels(labelsFunction)
+                .title("Link bandwidth")
+                .scale(colorScale);
+
+        legendSvg.select(".legendLog")
+                .call(logLegend);
+    }
+
+    function circleColour(d) {
+        if (d.WasSpeedCam) {
+            return "red";
+        } else {
+            return "blue";
+        }
+    }
+
+    function linkColour(d) {
+        return colorScale(d.AvgBytes);
+    }
+
+
+    createLegend();
+    var svgContainer = d3.select("#graph-svg-div").node();
+    //create somewhere to put the force directed graph
+    var svg = d3.select("#graph-svg"),
+            width = +svgContainer.clientWidth,
+            height = +svgContainer.clientHeight;
+    const radius = 15;
+
+    var node, link;
+
+    d3.json("../data", function (resultData) {
+        createGraph(resultData);
+    });
+
+    function createGraph(resultData) {
+
+        updateRunDataBox(resultData);
+
+        //set up the simulation and add forces
+        var simulation = d3.forceSimulation()
+                .nodes(resultData.NodeData);
+
+        var link_force = d3.forceLink(resultData.LinkData)
+                .id(function (d) {
+                    return d.Id;
+                });
+
+        var charge_force = d3.forceManyBody()
+                .strength(-100);
+
+        var center_force = d3.forceCenter(width / 2, height / 2);
+
+        simulation
+                .force("charge_force", charge_force)
+                .force("center_force", center_force)
+                .force("link", link_force)
+        ;
+
+
+        //add tick instructions:
+        simulation.on("tick", tickActions);
+
+
+        //add encompassing group for the zoom
+        var g = svg.append("g")
+                .attr("class", "everything");
+
+        //draw lines for the links
+        link = g.append("g")
+                .attr("class", "link")
+                .selectAll("line")
+                .data(resultData.LinkData)
+                .enter().append("line")
+                .attr("stroke-width", 2)
+                .style("stroke", linkColour)
+                .on("mouseover", onLinkHover);
+
+        //draw circles for the nodes
+        node = g.append("g")
+                .attr("class", "node")
+                .selectAll("circle")
+                .data(resultData.NodeData)
+                .enter();
+
+        var circle = node.append("circle")
+                .attr("r", radius)
+                .attr("stroke", circleColour)
+                .attr("fill", "white")
+                .on("mouseover", onNodeHover);
+
+        var text = node.append("text")
+                .text(function (d) {
+                    return d.Id
+                });
+
+        //add zoom capabilities
+        var zoom_handler = d3.zoom()
+                .on("zoom", zoom_actions);
+
+        zoom_handler(svg);
+
+        for (var i = 0; i < 500; ++i) {
+            simulation.tick();
+        }
+
+        function zoom_actions() {
+            g.attr("transform", d3.event.transform)
+        }
+
+        function tickActions() {
+            //update link positions
+            link.attr("x1", function (d) {
+                return d.source.x;
+            }).attr("y1", function (d) {
+                return d.source.y;
+            }).attr("x2", function (d) {
+                return d.target.x;
+            }).attr("y2", function (d) {
+                return d.target.y;
+            });
+            circle.attr("transform", function (d) {
+                return "translate(" + d.x + "," + d.y + ")";
+            });
+            text.attr("transform", function (d) {
+                return "translate(" + (d.x - radius / 2) + "," + (d.y + radius / 4) + ")";
+            });
+        }
+    }
+
+
+</script>
+</html>
