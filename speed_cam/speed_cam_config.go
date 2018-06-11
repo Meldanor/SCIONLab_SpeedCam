@@ -38,6 +38,8 @@ type SpeedCamConfig struct {
 	Verbose bool
 	// If it is an non empty string, the inspector will write the results to this dir as JSON files
 	ResultDir string
+	// Maximum amount of files before deleting old files. Zero or negative stands for infinity.
+	MaxResults int
 	// Currently supported are 'const', 'linear' and 'log'
 	ScaleType string
 	// The factor for the scale. For 'log' this is the base for the logarithmic, for 'linear' it is the factor and
@@ -62,6 +64,7 @@ func Default() *SpeedCamConfig {
 	config.SpeedCamDiff = 0
 	config.Verbose = true
 	config.ResultDir = ""
+	config.MaxResults = -1
 	config.ScaleType = "linear"
 	config.ScaleParam = 0.2
 	config.IntervalStrategy = "fixed"
@@ -100,4 +103,8 @@ func (config *SpeedCamConfig) Scale(n int) int {
 		MyLogger.Panicf("Unsupported scale type '%v'", config.ScaleType)
 		return -1
 	}
+}
+
+func (config *SpeedCamConfig) StoreInfiniteFiles() bool {
+	return config.MaxResults <= 0
 }

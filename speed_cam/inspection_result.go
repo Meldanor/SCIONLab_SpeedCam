@@ -22,6 +22,9 @@ import (
 	"github.com/scionproto/scion/go/lib/addr"
 	"io/ioutil"
 	"os"
+	"path"
+	"regexp"
+	"sort"
 	"time"
 )
 
@@ -95,20 +98,78 @@ func (result *InspectionResult) writeJsonResult(dir string) {
 		return
 	}
 
+	if !result.Config.StoreInfiniteFiles() {
+		err = result.deleteOldFiles(dir)
+		if err != nil {
+			MyLogger.Errorf("error deleting old files: %v, err: %v", dir, err)
+			return
+		}
+	}
+
 	// Format: YYYYMMDD_HHmmss
 	dateFormat := "20060102_150405"
-	path := fmt.Sprintf("%v/%v.json", dir, result.Start.Format(dateFormat))
-	MyLogger.Debugf("Start writing result as json file %v...", path)
+	filePath := fmt.Sprintf("%v/%v.json", dir, result.Start.Format(dateFormat))
+	MyLogger.Debugf("Start writing result as json file %v...", filePath)
 
 	data, err := json.Marshal(result)
 	if err != nil {
-		MyLogger.Errorf("error writing result json file. file: %v, err: %v", path, err)
+		MyLogger.Errorf("error writing result json file. file: %v, err: %v", filePath, err)
 		return
 	}
-	err = ioutil.WriteFile(path, data, 0777)
+	err = ioutil.WriteFile(filePath, data, 0777)
 	if err != nil {
-		MyLogger.Errorf("error writing result json file. file: %v, err: %v", path, err)
+		MyLogger.Errorf("error writing result json file. file: %v, err: %v", filePath, err)
 		return
 	}
-	MyLogger.Debugf("Finished writing result as json file %v", path)
+	MyLogger.Debugf("Finished writing result as json file %v", filePath)
+}
+
+func (result *InspectionResult) deleteOldFiles(dir string) error {
+
+	allFiles, err := ioutil.ReadDir(dir)
+	if err != nil {
+		return err
+	}
+
+	// Filter only inspection result files
+	regex, err := regexp.Compile("\\d{8}_\\d{6}\\.json")
+	if err != nil {
+		return err
+	}
+
+	files := make([]os.FileInfo, 0)
+	for _, v := range allFiles {
+		name := v.Name()
+		if regex.MatchString(name) {
+			files = append(files, v)
+		}
+
+	}
+
+	// File amount is in range, do not delete anything
+	// +1 because after the clean up there will be a new file created, so delete one additional
+	diff := (len(files) + 1) - result.Config.MaxResults
+	if diff < 0 {
+		return nil
+	}
+
+	MyLogger.Infof("Delete %v old log files", diff)
+	sort.Slice(files, func(i, j int) bool {
+		return files[i].ModTime().Before(files[j].ModTime())
+	})
+
+	deletedFiles := make([]string, 0)
+	for i := 0; i < diff; i++ {
+		filePath := path.Join(dir, files[i].Name())
+		err = os.Remove(filePath)
+		if err != nil {
+			MyLogger.Errorf("error removing file %v, err: %v", filePath, err)
+		} else {
+			deletedFiles = append(deletedFiles, filePath)
+		}
+	}
+
+	MyLogger.Infof("Removed %v files. File names: %v", len(deletedFiles), deletedFiles)
+
+	return nil
 }
