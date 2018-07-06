@@ -25,7 +25,7 @@ import (
 // Information about a single AS necessary for the SpeedCam algorithm.
 // Contains previous episode results and topology information.
 type speedCamInfo struct {
-	isdAs      addr.ISD_AS
+	isdAs      addr.IA
 	degree     uint
 	successes  *ring.Ring
 	activities *ring.Ring
@@ -33,7 +33,7 @@ type speedCamInfo struct {
 }
 
 // Constructs a new information with assigned ISD-AS and initialized ring buffers.
-func NewInfo(isdAs addr.ISD_AS, config *SpeedCamConfig) *speedCamInfo {
+func NewInfo(isdAs addr.IA, config *SpeedCamConfig) *speedCamInfo {
 	info := new(speedCamInfo)
 	info.isdAs = isdAs
 	info.successes = ring.New(config.Episodes)

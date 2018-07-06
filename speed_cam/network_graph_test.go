@@ -34,19 +34,19 @@ func TestEmptyGraph(t *testing.T) {
 func TestLoadGraph(t *testing.T) {
 
 	// Create graph
-	connections := make(map[addr.ISD_AS][]addr.ISD_AS)
+	connections := make(map[addr.IA][]addr.IA)
 
 	as17, _ := addr.IAFromString("1-7")
 	as18, _ := addr.IAFromString("1-8")
 	as19, _ := addr.IAFromString("1-9")
 
-	connections[*as17] = make([]addr.ISD_AS, 2)
-	connections[*as18] = make([]addr.ISD_AS, 2)
-	connections[*as19] = make([]addr.ISD_AS, 2)
+	connections[as17] = make([]addr.IA, 2)
+	connections[as18] = make([]addr.IA, 2)
+	connections[as19] = make([]addr.IA, 2)
 
-	connections[*as17] = append(connections[*as17], *as18, *as19)
-	connections[*as18] = append(connections[*as18], *as17, *as19)
-	connections[*as19] = append(connections[*as19], *as17, *as18)
+	connections[as17] = append(connections[as17], as18, as19)
+	connections[as18] = append(connections[as18], as17, as19)
+	connections[as19] = append(connections[as19], as17, as18)
 
 	graph := Load(connections, Default())
 
@@ -54,17 +54,18 @@ func TestLoadGraph(t *testing.T) {
 		t.Error("Expected 3 nodes, but contains ", graph.size)
 	}
 
-	n := len(graph.nodes[*as17].neighbors)
+	n := len(graph.nodes[as17].neighbors)
 	if n != 2 {
 		t.Error("Expected 2 neighbors of 1-7, but contains ", n)
 	}
 
-	n = len(graph.nodes[*as18].neighbors)
+	n = len(graph.nodes[as18].neighbors)
 	if n != 2 {
 		t.Error("Expected 2 neighbors of 1-8, but contains ", n)
 	}
 
-	n = len(graph.nodes[*as19].neighbors)
+	n = len(graph.nodes[as19].neighbors)
+	n = len(graph.nodes[as19].neighbors)
 	if n != 2 {
 		t.Error("Expected 2 neighbors of 1-9, but contains ", n)
 	}

@@ -15,16 +15,10 @@
 			"revisionTime": "2016-03-15T20:05:05Z"
 		},
 		{
-			"checksumSHA1": "1MTu+8zeeFbuG8LD8z4TI09hZ6g=",
-			"path": "github.com/perrig/scionlab/bwtester",
-			"revision": "5388d9a4a2de6c35f22b2776442a5168d777d6c0",
-			"revisionTime": "2018-03-12T22:46:54Z"
-		},
-		{
-			"checksumSHA1": "IuMioGLKf8DMBhq/xS8DhnySZdM=",
+			"checksumSHA1": "/TT01Plb6fjMxYejHwzJagVwciQ=",
 			"path": "github.com/scionproto/scion/go/lib/addr",
-			"revision": "24d2e97909599bf35dcbf6308aa2302610cf9689",
-			"revisionTime": "2018-02-07T17:03:35Z"
+			"revision": "fd8c91597fe86a6819eeff0b24758ef2dae02e6a",
+			"revisionTime": "2018-07-05T12:16:48Z"
 		},
 		{
 			"checksumSHA1": "AnKBN2Q4AWaSNb0JyINBQbnpxGM=",

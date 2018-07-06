@@ -27,16 +27,16 @@ import (
 )
 
 type SpeedCam struct {
-	isdAs    addr.ISD_AS
+	isdAs    addr.IA
 	duration time.Duration
 	start    time.Time
 }
 
-func CreateSpeedCam(isdAs addr.ISD_AS, duration time.Duration) *SpeedCam {
+func CreateSpeedCam(isdAs addr.IA, duration time.Duration) *SpeedCam {
 	return &SpeedCam{isdAs: isdAs, duration: duration}
 }
 
-func (cam *SpeedCam) Measure(measurementPoints []PrometheusClientInfo, pollInterval time.Duration) map[addr.ISD_AS][]SpeedCamResult {
+func (cam *SpeedCam) Measure(measurementPoints []PrometheusClientInfo, pollInterval time.Duration) map[addr.IA][]SpeedCamResult {
 
 	cam.start = time.Now()
 
@@ -47,7 +47,7 @@ func (cam *SpeedCam) Measure(measurementPoints []PrometheusClientInfo, pollInter
 		go cam.measureData(v, pollInterval, resultChannel)
 	}
 
-	resultMap := make(map[addr.ISD_AS][]SpeedCamResult)
+	resultMap := make(map[addr.IA][]SpeedCamResult)
 	for i := 0; i < len(measurementPoints); i++ {
 		result := <-resultChannel
 		if result.err != nil {
@@ -176,8 +176,8 @@ type SpeedCamResult struct {
 	Timestamp    time.Time
 	BandwidthIn  datasize.ByteSize
 	BandwidthOut datasize.ByteSize
-	Source       addr.ISD_AS
-	Neighbor     addr.ISD_AS
+	Source       addr.IA
+	Neighbor     addr.IA
 }
 
 type Result struct {

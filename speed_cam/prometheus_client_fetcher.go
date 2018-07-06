@@ -35,8 +35,8 @@ type PrometheusClientInfo struct {
 	Ip          string
 	Port        int
 	BrId        string
-	SourceIsdAs addr.ISD_AS
-	TargetIsdAs addr.ISD_AS
+	SourceIsdAs addr.IA
+	TargetIsdAs addr.IA
 }
 
 func (info *PrometheusClientInfo) URL() string {

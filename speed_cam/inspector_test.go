@@ -51,7 +51,7 @@ func TestAddAndConnect(t *testing.T) {
 	isdAs1, _ := addr.IAFromString("1-1")
 	isdAs2, _ := addr.IAFromString("1-5")
 
-	_, connected := inspector.graph.nodes[*isdAs1].neighbors[*isdAs2]
+	_, connected := inspector.graph.nodes[isdAs1].neighbors[isdAs2]
 
 	if !connected {
 		t.Error("Expected ASes connecte, but they werent")

@@ -29,10 +29,10 @@ import (
 )
 
 type InspectionResult struct {
-	SpeedCamResults []map[addr.ISD_AS][]SpeedCamResult
+	SpeedCamResults []map[addr.IA][]SpeedCamResult
 	Start           time.Time
 	Duration        time.Duration
-	Graph           map[addr.ISD_AS]InspectionResultGraphNode
+	Graph           map[addr.IA]InspectionResultGraphNode
 	Config          SpeedCamConfig
 }
 
@@ -42,7 +42,7 @@ type InspectionResultGraphNode struct {
 	CandidateScore float64
 	Degree         uint
 
-	Neighbors []addr.ISD_AS
+	Neighbors []addr.IA
 }
 
 type InspectionResultActivity struct {
@@ -51,7 +51,7 @@ type InspectionResultActivity struct {
 	Bandwidth datasize.ByteSize
 }
 
-func SerializableResult(inspector *Inspector, results []map[addr.ISD_AS][]SpeedCamResult, start time.Time,
+func SerializableResult(inspector *Inspector, results []map[addr.IA][]SpeedCamResult, start time.Time,
 	duration time.Duration) *InspectionResult {
 	result := InspectionResult{Start: start, Duration: duration, SpeedCamResults: results, Config: *inspector.config}
 	result.createInspectionGraph(inspector)
@@ -61,12 +61,12 @@ func SerializableResult(inspector *Inspector, results []map[addr.ISD_AS][]SpeedC
 func (result *InspectionResult) createInspectionGraph(inspector *Inspector) {
 
 	selector := Create(inspector.config)
-	result.Graph = make(map[addr.ISD_AS]InspectionResultGraphNode)
+	result.Graph = make(map[addr.IA]InspectionResultGraphNode)
 
 	for k, v := range inspector.graph.nodes {
 
 		node := InspectionResultGraphNode{}
-		var neighbors []addr.ISD_AS
+		var neighbors []addr.IA
 		for neighbor := range v.neighbors {
 			neighbors = append(neighbors, neighbor)
 		}

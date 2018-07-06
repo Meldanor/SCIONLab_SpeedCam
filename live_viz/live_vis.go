@@ -184,10 +184,10 @@ func createNodeData(result speed_cam.InspectionResult) []NodeData {
 		for _, result := range result.SpeedCamResults {
 			for _, v := range result {
 				for _, r := range v {
-					if r.Source == *nodeIsdAs {
+					if r.Source == nodeIsdAs {
 						nodeData.WasSpeedCam = true
 					}
-					if r.Source == *nodeIsdAs || r.Neighbor == *nodeIsdAs {
+					if r.Source == nodeIsdAs || r.Neighbor == nodeIsdAs {
 						bandwidth += r.BandwidthIn + r.BandwidthOut
 						n++
 					}
@@ -245,9 +245,9 @@ func averageLinkBandwidth(source string, target string, result speed_cam.Inspect
 	for _, v := range result.SpeedCamResults {
 
 		// check source->target way
-		results, exists := v[*sourceIsdAs]
+		results, exists := v[sourceIsdAs]
 		// Are the results from target to source -> count them
-		if exists && results[0].Neighbor == *targetIsdAs {
+		if exists && results[0].Neighbor == targetIsdAs {
 			for _, r := range results {
 				bandwidthTotal += r.BandwidthIn + r.BandwidthOut
 				n++
@@ -255,9 +255,9 @@ func averageLinkBandwidth(source string, target string, result speed_cam.Inspect
 		}
 
 		// Check target->source way
-		results, exists = v[*targetIsdAs]
+		results, exists = v[targetIsdAs]
 		// Are the results from target to source -> count them
-		if exists && results[0].Source == *sourceIsdAs {
+		if exists && results[0].Source == sourceIsdAs {
 			for _, r := range results {
 				bandwidthTotal += r.BandwidthIn + r.BandwidthOut
 				n++

@@ -63,13 +63,13 @@ func (inspector *Inspector) HandlePathRequest(pathRequest string) error {
 		return errors.New(fmt.Sprintf("Path request has invalid format or no pairs. Request:%s", pathRequest))
 	}
 
-	var isdAses []addr.ISD_AS
+	var isdAses []addr.IA
 	for _, e := range isdPairs {
 		isdAs, err := addr.IAFromString(e)
 		if err != nil {
 			return errors.New(fmt.Sprintf("Path request has invalid format or no pairs. Request:%s", pathRequest))
 		}
-		isdAses = append(isdAses, *isdAs)
+		isdAses = append(isdAses, isdAs)
 	}
 
 	// Add all ASes to the graph
@@ -114,7 +114,7 @@ func (inspector *Inspector) StartInspection() {
 	selectSpeedCams := selector.SelectUsableSpeedCams(usableSpeedCams)
 
 	size := len(selectSpeedCams)
-	resultChannel := make(chan map[addr.ISD_AS][]SpeedCamResult, size)
+	resultChannel := make(chan map[addr.IA][]SpeedCamResult, size)
 	defer close(resultChannel)
 
 	inspectionDuration := 30 * time.Second
@@ -124,12 +124,12 @@ func (inspector *Inspector) StartInspection() {
 		speedCam := CreateSpeedCam(selectedSpeedCam.IsdAs, inspectionDuration)
 		MyLogger.Debugf("Start speed cam on '%v' for %v \n", selectedSpeedCam.IsdAs, inspectionDuration)
 
-		go func(cam *SpeedCam, c chan map[addr.ISD_AS][]SpeedCamResult) {
+		go func(cam *SpeedCam, c chan map[addr.IA][]SpeedCamResult) {
 			c <- cam.Measure(info, 5*time.Second)
 		}(speedCam, resultChannel)
 	}
 
-	var inspectionResults []map[addr.ISD_AS][]SpeedCamResult
+	var inspectionResults []map[addr.IA][]SpeedCamResult
 	for i := 0; i < size; i++ {
 		inspectionResults = append(inspectionResults, <-resultChannel)
 	}
@@ -143,8 +143,8 @@ func (inspector *Inspector) StartInspection() {
 	MyLogger.Info("Inspection finished!")
 }
 
-func filterNodesWithBrInfos(clientInfo map[addr.ISD_AS][]PrometheusClientInfo, nodes map[addr.ISD_AS]networkNode) map[addr.ISD_AS]networkNode {
-	filteredMap := make(map[addr.ISD_AS]networkNode)
+func filterNodesWithBrInfos(clientInfo map[addr.IA][]PrometheusClientInfo, nodes map[addr.IA]networkNode) map[addr.IA]networkNode {
+	filteredMap := make(map[addr.IA]networkNode)
 
 	for k, v := range nodes {
 		_, exists := clientInfo[k]
@@ -156,7 +156,7 @@ func filterNodesWithBrInfos(clientInfo map[addr.ISD_AS][]PrometheusClientInfo, n
 	return filteredMap
 }
 
-func presentResults(results []map[addr.ISD_AS][]SpeedCamResult) {
+func presentResults(results []map[addr.IA][]SpeedCamResult) {
 
 	for i := 0; i < len(results); i++ {
 		measureResults := results[i]
@@ -171,10 +171,10 @@ func presentResults(results []map[addr.ISD_AS][]SpeedCamResult) {
 	}
 }
 
-func (inspector *Inspector) aggregateResults(results []map[addr.ISD_AS][]SpeedCamResult, start time.Time,
+func (inspector *Inspector) aggregateResults(results []map[addr.IA][]SpeedCamResult, start time.Time,
 	inspectionDuration time.Duration) {
 
-	bandwidthPerNode := make(map[addr.ISD_AS]datasize.ByteSize)
+	bandwidthPerNode := make(map[addr.IA]datasize.ByteSize)
 
 	for _, m := range results {
 		for _, v := range m {
@@ -224,8 +224,8 @@ func (inspector *Inspector) aggregateResults(results []map[addr.ISD_AS][]SpeedCa
 
 }
 
-func groupBySource(clientInfos []PrometheusClientInfo) map[addr.ISD_AS][]PrometheusClientInfo {
-	result := make(map[addr.ISD_AS][]PrometheusClientInfo)
+func groupBySource(clientInfos []PrometheusClientInfo) map[addr.IA][]PrometheusClientInfo {
+	result := make(map[addr.IA][]PrometheusClientInfo)
 
 	for _, clientInfo := range clientInfos {
 		k := clientInfo.SourceIsdAs

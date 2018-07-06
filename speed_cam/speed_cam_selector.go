@@ -37,8 +37,8 @@ type speedCamCandidate struct {
 	node  networkNode
 }
 
-func (selector *SpeedCamSelector) SelectUsableSpeedCams(nodes map[addr.ISD_AS]networkNode) []networkNode {
-	candidates := make(map[addr.ISD_AS]*speedCamCandidate)
+func (selector *SpeedCamSelector) SelectUsableSpeedCams(nodes map[addr.IA]networkNode) []networkNode {
+	candidates := make(map[addr.IA]*speedCamCandidate)
 	for k, v := range nodes {
 		candidates[k] = selector.calculateScore(v)
 	}
@@ -62,7 +62,7 @@ func (selector *SpeedCamSelector) calculateScore(node networkNode) *speedCamCand
 	return candidate
 }
 
-func (selector *SpeedCamSelector) normalizeScores(candidates map[addr.ISD_AS]*speedCamCandidate) {
+func (selector *SpeedCamSelector) normalizeScores(candidates map[addr.IA]*speedCamCandidate) {
 	maxScore := -1.0
 
 	for _, v := range candidates {
@@ -74,13 +74,13 @@ func (selector *SpeedCamSelector) normalizeScores(candidates map[addr.ISD_AS]*sp
 	}
 }
 
-func (selector *SpeedCamSelector) selectCams(candidates map[addr.ISD_AS]*speedCamCandidate) []networkNode {
+func (selector *SpeedCamSelector) selectCams(candidates map[addr.IA]*speedCamCandidate) []networkNode {
 
 	count := selector.config.Scale(len(candidates)) + selector.config.SpeedCamDiff
 	MyLogger.Debugf("Candidates: %v, SpeedCam count: %v", len(candidates), count)
 	var i = 0
 
-	selectedCams := make(map[addr.ISD_AS]*speedCamCandidate)
+	selectedCams := make(map[addr.IA]*speedCamCandidate)
 
 	for k, v := range candidates {
 		MyLogger.Debugf("Candidate: %v, chance: %.4f", k, v.score)

@@ -315,7 +315,7 @@ func parseBrTopologyFile(topologyFile string, info *sc.PrometheusClientInfo) {
 		return
 	}
 	sourceIsdAs, _ := addr.IAFromString(root["ISD_AS"].(string))
-	info.SourceIsdAs = *sourceIsdAs
+	info.SourceIsdAs = sourceIsdAs
 	// Go down the hierarchy
 	borderRouters := root["BorderRouters"].(map[string]interface{})
 	borderRouterInfoObject := borderRouters[info.BrId].(map[string]interface{})
@@ -327,7 +327,7 @@ func parseBrTopologyFile(topologyFile string, info *sc.PrometheusClientInfo) {
 	for _, v := range interfacesObject {
 		value := v.(map[string]interface{})
 		targetIsdAs, _ := addr.IAFromString(value["ISD_AS"].(string))
-		info.TargetIsdAs = *targetIsdAs
+		info.TargetIsdAs = targetIsdAs
 		break
 	}
 }

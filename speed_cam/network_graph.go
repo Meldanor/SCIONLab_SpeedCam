@@ -25,7 +25,7 @@ import (
 
 // A symmetric graph representing the topology of a SCION network
 type NetworkGraph struct {
-	nodes  map[addr.ISD_AS]networkNode
+	nodes  map[addr.IA]networkNode
 	size   uint32
 	config *SpeedCamConfig
 }
@@ -33,14 +33,14 @@ type NetworkGraph struct {
 // Creates an empty graph without any ASes inside
 func CreateEmpty(config *SpeedCamConfig) *NetworkGraph {
 	graph := new(NetworkGraph)
-	graph.nodes = make(map[addr.ISD_AS]networkNode)
+	graph.nodes = make(map[addr.IA]networkNode)
 	graph.size = 0
 	graph.config = config
 	return graph
 }
 
 // Creates graph from a connection list. The information values are default ones
-func Load(connections map[addr.ISD_AS][]addr.ISD_AS, config *SpeedCamConfig) *NetworkGraph {
+func Load(connections map[addr.IA][]addr.IA, config *SpeedCamConfig) *NetworkGraph {
 	graph := CreateEmpty(config)
 
 	for k, neighbors := range connections {
@@ -56,7 +56,7 @@ func Load(connections map[addr.ISD_AS][]addr.ISD_AS, config *SpeedCamConfig) *Ne
 
 // Adds an AS to the graph without connections or information about it.
 // Duplicate ISD-ASes are permitted and will result in an error.
-func (graph *NetworkGraph) AddIsdAs(isdAs addr.ISD_AS) error {
+func (graph *NetworkGraph) AddIsdAs(isdAs addr.IA) error {
 	_, exists := graph.nodes[isdAs]
 	// Do not add an existing AS twice
 	if exists {
@@ -65,7 +65,7 @@ func (graph *NetworkGraph) AddIsdAs(isdAs addr.ISD_AS) error {
 	node := new(networkNode)
 	node.IsdAs = isdAs
 	node.info = NewInfo(isdAs, graph.config)
-	node.neighbors = make(map[addr.ISD_AS]networkNode)
+	node.neighbors = make(map[addr.IA]networkNode)
 	graph.nodes[isdAs] = *node
 	graph.size++
 	return nil
@@ -73,7 +73,7 @@ func (graph *NetworkGraph) AddIsdAs(isdAs addr.ISD_AS) error {
 
 // Connects two ASes with each other and increases their degrees by one.
 // The both ASes must be added to the graph or the call will result in an error, so will already connected ASes.
-func (graph *NetworkGraph) ConnectIsdAses(source addr.ISD_AS, target addr.ISD_AS) error {
+func (graph *NetworkGraph) ConnectIsdAses(source addr.IA, target addr.IA) error {
 
 	sourceNode, exists := graph.nodes[source]
 	if !exists {
@@ -101,7 +101,7 @@ func (graph *NetworkGraph) ConnectIsdAses(source addr.ISD_AS, target addr.ISD_AS
 	return nil
 }
 
-func (graph *NetworkGraph) AddBandwidth(isdAs *addr.ISD_AS, start time.Time, duration time.Duration, bandwidth datasize.ByteSize) error {
+func (graph *NetworkGraph) AddBandwidth(isdAs *addr.IA, start time.Time, duration time.Duration, bandwidth datasize.ByteSize) error {
 
 	node, exists := graph.nodes[*isdAs]
 	if !exists {
@@ -114,7 +114,7 @@ func (graph *NetworkGraph) AddBandwidth(isdAs *addr.ISD_AS, start time.Time, dur
 }
 
 type networkNode struct {
-	IsdAs     addr.ISD_AS
+	IsdAs     addr.IA
 	info      *speedCamInfo
-	neighbors map[addr.ISD_AS]networkNode
+	neighbors map[addr.IA]networkNode
 }
