@@ -51,14 +51,14 @@ func CreateWithGraph(config *SpeedCamConfig, graph *NetworkGraph) *Inspector {
 	return inspector
 }
 
-var isdAsRegex = regexp.MustCompile(`(\d+-\d+)`)
+var isdAsRegex = regexp.MustCompile(`(\s*\d+>\d+\s*)`)
 
 // Handles a path request to update the network graph.
 // Input format is: ISD-AS /d>/dISD-AS
 // Example: 1-1 1>1 1-5 4>3 1-6 2>1 1-7
 func (inspector *Inspector) HandlePathRequest(pathRequest string) error {
 
-	isdPairs := isdAsRegex.FindAllString(pathRequest, -1)
+	isdPairs := isdAsRegex.Split(pathRequest,-1)
 	if isdPairs == nil {
 		return errors.New(fmt.Sprintf("Path request has invalid format or no pairs. Request:%s", pathRequest))
 	}

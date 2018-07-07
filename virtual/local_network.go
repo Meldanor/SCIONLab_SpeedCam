@@ -199,6 +199,7 @@ func pathServerFetching(logDir string, url string) {
 func parseBrInformation(genDir string) []sc.PrometheusClientInfo {
 
 	var locBrInfos []sc.PrometheusClientInfo
+	// TODO: This is broken and must be adapted to new version of IA (previously ISD_AS)
 	regex, err := regexp.Compile("br\\d+-\\d+-\\d+$")
 	if err != nil {
 		sc.MyLogger.Criticalf("error regex %v", err)
