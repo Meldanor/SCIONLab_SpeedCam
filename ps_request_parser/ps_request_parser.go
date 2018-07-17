@@ -26,12 +26,14 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"time"
 )
 
 func main() {
 
 	logDirPtr := flag.String("logs", "", "Path to log directory")
 	sendPathRequestsResource := flag.String("target", "", "the URL to send path requests to")
+	timeout := flag.Duration("timeout", 24*time.Hour, "The maximum amount of time difference before ignoring the path server request")
 
 	flag.Parse()
 
@@ -45,10 +47,10 @@ func main() {
 		return
 	}
 
-	StartParseLogs(*logDirPtr, *sendPathRequestsResource)
+	StartParseLogs(*logDirPtr, *sendPathRequestsResource, *timeout)
 }
 
-func StartParseLogs(logDir string, sendPathRequestResource string) {
+func StartParseLogs(logDir string, sendPathRequestResource string, timeout time.Duration) {
 
 	_, err := os.Stat(logDir)
 
@@ -69,7 +71,7 @@ func StartParseLogs(logDir string, sendPathRequestResource string) {
 
 	fmt.Println("Parsing log files: ", pathServerLogFiles)
 	for _, logFile := range pathServerLogFiles {
-		parseLogFile(logFile, sendPathRequestResource)
+		parseLogFile(logFile, sendPathRequestResource, timeout)
 	}
 }
 
@@ -100,7 +102,7 @@ func searchPathServerLogs(root string) ([]string, error) {
 
 const pathRequestSubstring = "Handling PCB from"
 
-func parseLogFile(logFilePath string, sendPathRequestsResource string) {
+func parseLogFile(logFilePath string, sendPathRequestsResource string, timeout time.Duration) {
 	fmt.Printf("start parsing log file %v\n", logFilePath)
 	inFile, err := os.Open(logFilePath)
 	defer inFile.Close()
@@ -114,9 +116,11 @@ func parseLogFile(logFilePath string, sendPathRequestsResource string) {
 	scanner.Split(bufio.ScanLines)
 
 	uniquePathRequests := make(map[string]bool)
+	// Subtract the duration from the time
+	oldestAllowedDate := time.Now().Add((-1) * timeout)
 	for scanner.Scan() {
 		line := scanner.Text()
-		if strings.Contains(line, pathRequestSubstring) {
+		if strings.Contains(line, pathRequestSubstring) && isNewPathRequest(line, oldestAllowedDate) {
 			line = reducePathRequest(line)
 			uniquePathRequests[line] = true
 		}
@@ -132,6 +136,16 @@ func parseLogFile(logFilePath string, sendPathRequestsResource string) {
 	sendPathRequests(pathRequestsLines, sendPathRequestsResource)
 }
 
+func isNewPathRequest(line string, oldestAllowedDate time.Time) bool {
+	timeString := line[0:19]
+	timestamp, err := time.Parse("2006-01-02 15:04:05", timeString)
+	if err != nil {
+		fmt.Printf("time parsing error - line: '%v', err: '%v'\n", timeString, err)
+		return false
+	}
+	return timestamp.After(oldestAllowedDate)
+}
+
 func reducePathRequest(line string) string {
 	if len(line) == 0 {
 		return line
@@ -142,7 +156,7 @@ func reducePathRequest(line string) string {
 	if j < i {
 		j = len(line) - 1
 	}
-	return line[i+2: j]
+	return line[i+2 : j]
 }
 
 func sendPathRequests(rawPathRequests []string, sendPathRequestsResource string) {
